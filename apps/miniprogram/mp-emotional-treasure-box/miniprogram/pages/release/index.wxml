@@ -1,0 +1,73 @@
+<view class="container">
+  <view class="container-inner">
+    <!-- 标题和统计 -->
+    <view class="header">
+      <view class="title">写下你的焦虑</view>
+      <view class="subtitle">让它在这里消失</view>
+      <view class="stats" wx:if="{{isLogin && totalShredded > 0}}">
+        <text class="stats-text">已粉碎 {{totalShredded}} 次焦虑</text>
+        <text class="stats-link" bindtap="viewHistory">查看历史</text>
+      </view>
+    </view>
+
+    <!-- 输入卡片 -->
+    <view class="card">
+      <textarea
+        class="input-area"
+        placeholder="把你的焦虑写在这里...;比如：工作进度、人际关系、未来迷茫..."
+        placeholder-style="color:#bbb;"
+        maxlength="500"
+        value="{{content}}"
+        bindinput="onInput"
+        disabled="{{shredding}}"
+      />
+      <view class="char-count">{{content.length}}/500</view>
+    </view>
+
+    <!-- 碎纸机区域 -->
+    <view class="shredder-zone">
+      <!-- 纸张（进入碎纸机的纸） -->
+      <view class="paper {{shredding ? 'feeding' : ''}}">
+        <view class="paper-fold"></view>
+        <view class="paper-text" wx:if="{{content && !shredding}}">{{content.slice(0, 20)}}...</view>
+      </view>
+
+      <!-- 碎纸机机身 -->
+      <view class="machine {{shredding ? 'working' : ''}}">
+        <!-- 入纸口 -->
+        <view class="machine-slot"></view>
+        <!-- 机身上半 -->
+        <view class="machine-body">
+          <view class="shred-btn {{shredding ? 'disabled' : ''}}" bindtap="onShred">
+            <text>{{shredding ? '粉碎中...' : '粉碎焦虑'}}</text>
+          </view>
+        </view>
+        <!-- 机身底部出纸口 -->
+        <view class="machine-bottom">
+          <view class="teeth" wx:for="{{13}}" wx:key="index"></view>
+        </view>
+      </view>
+
+      <!-- 碎纸条（从机器底部出来的长条） -->
+      <view class="strips-zone {{shredding ? 'animating' : ''}}">
+        <view class="strip" wx:for="{{strips}}" wx:key="index"
+          style="left:{{item.left}}rpx; animation-delay:{{item.delay}}ms;">
+        </view>
+      </view>
+
+      <!-- 飘落的碎纸片 -->
+      <view class="confetti-zone {{shredding ? 'animating' : ''}}">
+        <view class="confetti" wx:for="{{confetti}}" wx:key="index"
+          style="left:{{item.left}}rpx; animation-delay:{{item.delay}}ms; transform:rotate({{item.rotate}}deg);">
+        </view>
+      </view>
+
+      <!-- 底部碎纸堆 -->
+      <view class="pile {{showPile ? 'visible' : ''}}">
+        <view class="pile-piece" wx:for="{{pileItems}}" wx:key="index"
+          style="left:{{item.left}}rpx; bottom:{{item.bottom}}rpx; width:{{item.w}}rpx; height:{{item.h}}rpx; transform:rotate({{item.r}}deg);">
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

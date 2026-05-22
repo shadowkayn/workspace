@@ -1,0 +1,59 @@
+<view class="container">
+  <view class="header">
+    <text class="title">收藏金句</text>
+    <text class="count">共 {{favorites.length}} 条</text>
+  </view>
+
+  <view class="list" wx:if="{{favorites.length > 0}}">
+    <view class="item" wx:for="{{favorites}}" wx:key="timestamp">
+      <view class="item-content" bindtap="viewQuote" data-index="{{index}}">
+        <view class="quote">"{{item.quote}}"</view>
+        <view class="meta">
+          <text class="author">—— {{item.author}}</text>
+          <text class="date">{{item.date}}</text>
+        </view>
+      </view>
+      <view class="item-actions">
+        <view class="action-btn share" bindtap="generateCard" data-item="{{item}}">
+          <text>生成日签</text>
+        </view>
+        <view class="action-btn delete" bindtap="deleteFavorite" data-index="{{index}}">
+          <text>删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>
+    <text class="empty-icon">♡</text>
+    <text class="empty-text">还没有收藏任何日签</text>
+    <navigator url="/pages/clarity/index" class="empty-btn">
+      <text>去看看</text>
+    </navigator>
+  </view>
+
+  <!-- 日签生成画布（隐藏） -->
+  <view style="position:fixed;left:-9999px;">
+    <canvas type="2d" id="dailyCardCanvas" style="width:450px;height:800px;"></canvas>
+  </view>
+
+  <!-- 日签预览弹窗 - 3D翻牌效果 -->
+  <view class="card-modal" wx:if="{{showCardModal}}" bindtap="closeCardModal">
+    <view class="card-flip-container {{cardFlipped ? 'flipped' : ''}}" catchtap="">
+      <!-- 卡片背面 -->
+      <view class="card-face card-back">
+        <view class="card-back-pattern">
+          <view class="pattern-circle"></view>
+          <text class="pattern-text">✦ 拾光宝盒 ✦</text>
+        </view>
+      </view>
+      <!-- 卡片正面 -->
+      <view class="card-face card-front">
+        <image class="card-preview" src="{{cardImagePath}}" mode="aspectFit"></image>
+      </view>
+    </view>
+    <view class="card-actions" wx:if="{{cardFlipped}}">
+      <button class="save-btn" catchtap="saveCardToAlbum">保存到相册</button>
+    </view>
+  </view>
+</view>

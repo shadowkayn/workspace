@@ -1,0 +1,61 @@
+<view class="container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="title">情绪历史</view>
+    <view class="subtitle">共记录 {{records.length}} 天</view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-section" wx:if="{{moodInfo.id}}">
+    <view class="stats-title">情绪分析</view>
+    <view class="most-frequent">
+      <text class="frequent-label">最常出现的情绪</text>
+      <view class="frequent-mood">
+        <image class="frequent-emoji" alt="emoji" src="{{ moodInfo.emoji }}" />
+        <text class="frequent-name">{{moodInfo.name}}</text>
+        <text class="frequent-count">{{moodStats[moodInfo.id]}}次</text>
+      </view>
+    </view>
+    
+    <!-- 情绪关怀提示 -->
+    <view class="mood-care">
+      <image class="care-icon" alt="alt" src="/images/icons/tips.png"/>
+      <view class="care-content">
+        <text class="care-text">{{moodTips[moodInfo.id]}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:elif="{{isEmpty}}">
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">还没有情绪记录</text>
+    <text class="empty-tip">去记录你的第一个心情吧</text>
+  </view>
+
+  <!-- 历史列表 -->
+  <view class="list" wx:else>
+    <view class="list-item" wx:for="{{records}}" wx:key="_id">
+      <view class="item-content" bindtap="viewDetail" data-item="{{item}}">
+        <view class="item-mood">
+          <text class="item-emoji">{{getMoodInfo(item.mood).emoji}}</text>
+          <view class="item-info">
+            <text class="item-name">{{getMoodInfo(item.mood).name}}</text>
+            <text class="item-date">{{item.dateStr}}</text>
+          </view>
+        </view>
+        <view class="item-note" wx:if="{{item.note}}">
+          <text>{{item.note}}</text>
+        </view>
+      </view>
+      <view class="item-delete" bindtap="deleteRecord" data-item="{{item}}">
+        <text>删除</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,51 @@
+<view class="container">
+  <!-- 头部用户信息 -->
+  <view class="header">
+    <view class="avatar-wrap">
+      <image class="avatar" src="{{userInfo ? userInfo.avatarUrl : '/images/avatar.png'}}" mode="aspectFill"></image>
+    </view>
+    <text class="nickname">{{userInfo ? userInfo.nickName : '情绪观察员'}}</text>
+    
+    <!-- 未登录显示登录按钮 -->
+    <button 
+      wx:if="{{!isLogin}}"
+      class="login-btn"
+      bindtap="handleLogin">
+      <text>一键登录</text>
+    </button>
+    <text class="login-tip" wx:if="{{!isLogin}}">登录后可使用收藏等功能</text>
+  </view>
+
+  <!-- 功能卡片 -->
+  <view class="card">
+    <view class="menu-item" bindtap="goToFavorites">
+      <view class="menu-left">
+        <text class="icon">⭐</text>
+        <text class="menu-text">拾光宝盒 (收藏金句)</text>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="goToMoodHistory">
+      <view class="menu-left">
+        <text class="icon">📝</text>
+        <text class="menu-text">情绪历史 (心情记录)</text>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="goToHistory">
+      <view class="menu-left">
+        <text class="icon">🗑️</text>
+        <text class="menu-text">碎碎平安 (粉碎记录)</text>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 分享提示 -->
+  <view class="share-tip">
+    <image class="tip-icon" src="/images/icons/share.png"/>
+    <text class="tip-text">点击右上角「···」分享给共鸣的人</text>
+  </view>
+</view>

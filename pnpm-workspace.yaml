@@ -1,0 +1,5 @@
+packages:
+  - "apps/miniprogram/*"
+  - "apps/server/*"
+  - "apps/admin/*"
+  - "apps/web/*"

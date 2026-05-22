@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"      // 推荐目前稳定使用这个
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+// prisma/schema.prisma
+
+// ==========================================
+// 用户模块
+// ==========================================
+model User {
+  id               String           @id @default(cuid())
+  openid           String           @unique
+  nickname         String?
+  avatarUrl        String?
+  createdAt        DateTime         @default(now())
+
+  // 关联：一个用户有多条心情记录、收藏和焦虑历史
+  moodRecords      MoodRecord[]
+  favorites        UserFavorite[]
+  anxietyHistories AnxietyHistory[]
+}
+
+// ==========================================
+// 治愈语录表
+// ==========================================
+model Quote {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  author    String   @default("佚名")
+  category  String   @default("默认")
+  createdAt DateTime @default(now())
+
+  // 被收藏的关系
+  favoritedBy UserFavorite[]
+}
+
+// ==========================================
+// 用户收藏表 （多对多中间表）
+// ==========================================
+model UserFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  quoteId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  quote     Quote    @relation(fields: [quoteId], references: [id])
+
+  @@unique([userId, quoteId]) // 防止重复收藏
+}
+
+// ==========================================
+// 情绪记录表
+// ==========================================
+model MoodRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  moodTag   String   // 例如：开心、难过、焦虑
+  note      String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// ==========================================
+// 焦虑记录历史表
+// ==========================================
+model AnxietyHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  score     Int      // 焦虑分值
+  reason    String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// ==========================================
+// 背景图片
+// ==========================================
+model BackgroundImage {
+  id        String   @id @default(cuid())
+  url       String
+  name      String?
+  isActive  Boolean  @default(true)
+}

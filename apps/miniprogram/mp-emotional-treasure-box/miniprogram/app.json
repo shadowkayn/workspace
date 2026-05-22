@@ -1,0 +1,44 @@
+{
+  "pages": [
+    "pages/clarity/index",
+    "pages/release/index",
+    "pages/breathe/index",
+    "pages/profile/index",
+    "pages/favorites/index",
+    "pages/anxiety-history/index",
+    "pages/mood-history/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F9F7F7",
+    "navigationBarTitleText": "反内耗情绪宝盒",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F9F7F7"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#AAABB8",
+    "selectedColor": "#3F72AF",
+    "backgroundColor": "#fbf7ef",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/clarity/index",
+        "text": "清醒"
+      },
+      {
+        "pagePath": "pages/release/index",
+        "text": "释放"
+      },
+      {
+        "pagePath": "pages/breathe/index",
+        "text": "记录"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

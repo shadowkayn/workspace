@@ -1,0 +1,128 @@
+<view class="container">
+  <!-- 标题 -->
+  <view class="header">
+    <text class="title">情绪日记</text>
+    <text class="subtitle">记录此刻的心情</text>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-card" wx:if="{{totalRecords > 0}}">
+    <view class="stat-item">
+      <text class="stat-number">{{totalRecords}}</text>
+      <text class="stat-label">天记录</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item" bindtap="viewHistory">
+      <text class="stat-link">查看历史</text>
+    </view>
+  </view>
+
+  <!-- 今日记录区域 -->
+  <view class="today-section">
+    <view class="section-title">
+      <text class="title-text">今天的心情</text>
+      <text class="title-date">{{todayRecorded ? '已记录' : ''}}</text>
+    </view>
+
+    <!-- 未记录提示 -->
+    <view class="today-tip" wx:if="{{!todayRecorded && !todayMood}}">
+      <text class="tip-emoji">🌸</text>
+      <text class="tip-message">今天还没记录情绪哟～</text>
+    </view>
+
+    <!-- 情绪选择 -->
+    <view class="mood-grid">
+      <view 
+        wx:for="{{moods}}" 
+        wx:key="id"
+        class="mood-item {{todayMood === item.id ? 'selected' : ''}} {{todayRecorded ? 'disabled' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="selectMood"
+        style="border-color: {{todayMood === item.id ? item.color : 'transparent'}}"
+      >
+        <image class="mood-emoji" alt="emoji" src="{{ item.emoji }}" />
+        <text class="mood-name" style="color: {{todayMood === item.id ? item.color : '#8b7355'}}">{{item.name}}</text>
+      </view>
+    </view>
+
+    <!-- 备注输入 -->
+    <view class="note-section" wx:if="{{todayMood && !todayRecorded}}">
+      <textarea 
+        class="note-input"
+        placeholder="想说点什么吗？（选填）"
+        placeholder-style="color: #bbb"
+        maxlength="800"
+        value="{{todayNote}}"
+        bindinput="onNoteInput"
+      />
+      <view class="char-count">{{todayNote.length}}/800</view>
+    </view>
+
+    <!-- 已记录的备注显示 -->
+    <view class="note-display" wx:if="{{todayRecorded && todayNote}}">
+      <text class="note-label">今日备注</text>
+      <text class="note-text">{{todayNote}}</text>
+    </view>
+
+    <!-- 保存按钮 -->
+    <view class="save-btn" wx:if="{{todayMood && !todayRecorded}}" bindtap="saveMood">
+      <text>保存今日心情</text>
+    </view>
+
+    <!-- 已记录提示 -->
+    <view class="recorded-tip" wx:if="{{todayRecorded}}">
+      <text class="tip-icon">✓</text>
+      <text class="tip-text">今天已记录，明天再来吧</text>
+    </view>
+  </view>
+
+  <!-- 最近情绪统计 -->
+  <view class="recent-section" wx:if="{{recentMoods.length > 0}}">
+    <view class="section-title">
+      <text class="title-text">最近7天情绪分布</text>
+      <text class="title-tip" bindtap="viewHistory">查看详情</text>
+    </view>
+
+    <!-- 情绪统计图表 -->
+    <view class="mood-chart">
+      <view class="chart-item" wx:for="{{moods}}" wx:key="id" wx:if="{{moodStats[item.id] > 0}}">
+        <view class="chart-label">
+          <image class="chart-emoji" alt="emoji" src="{{ item.emoji }}" />
+          <text class="chart-name">{{item.name}}</text>
+        </view>
+        <view class="chart-bar-container">
+          <view 
+            class="chart-bar" 
+            style="width: {{(moodStats[item.id] / totalRecords * 100)}}%; background: {{item.color}}20; border-left: 4rpx solid {{item.color}}"
+          >
+            <text class="chart-count" style="color: {{item.color}}">{{moodStats[item.id]}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 情绪分析提示 -->
+    <view class="mood-insight" wx:if="{{moodInfo.id}}">
+      <view class="insight-header">
+        <text class="insight-icon">💭</text>
+        <text class="insight-title">情绪洞察</text>
+      </view>
+      <view class="insight-content">
+        <text class="insight-text">最近你的 </text>
+        <image class="chart-emoji" alt="emoji" src="{{ moodInfo.emoji }}" />
+        <text class="insight-mood" style="color: {{moodInfo.color}}">{{moodInfo.name}}</text>
+        <text class="insight-text">出现得最多</text>
+      </view>
+      <view class="insight-tip">
+        <text>{{moodTips[moodInfo.id]}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{totalRecords === 0 && !todayMood}}">
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">开始记录你的第一个心情吧</text>
+    <text class="empty-tip">觉察是改变的第一步</text>
+  </view>
+</view>

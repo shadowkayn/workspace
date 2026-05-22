@@ -1,0 +1,24 @@
+/* app.wxss */
+page {
+  /* 莫兰迪色系变量 */
+  --bg-color: #F9F7F7;      /* 全局奶油白背景 */
+  --primary-blue: #3F72AF;  /* 沉稳蓝（主文字） */
+  --accent-blue: #DBE2EF;   /* 浅蓝（按钮/边框） */
+  --soft-grey: #AAABB8;     /* 辅助灰 */
+  --sage-green: #91A398;    /* 治愈绿（选中状态） */
+
+  background-color: var(--bg-color);
+  font-family: ZCool, -apple-system, sans-serif;
+  font-size: 28rpx;
+  color: var(--primary-blue);
+  line-height: 1.5;
+}
+
+/* 全局布局辅助类 */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background-image: linear-gradient(225deg, #A9C9CA 0%, #E8F1EF 100%);
+}

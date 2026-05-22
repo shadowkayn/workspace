@@ -1,0 +1,316 @@
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* 音乐按钮 */
+.music-btn {
+  position: absolute;
+  top: 20rpx;
+  right: 24rpx;
+  width: 64rpx;
+  height: 64rpx;
+  z-index: 10;
+  background: rgba(231, 226, 208, 0.8);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.music-btn image {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.music-btn.rotating {
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 语录区域 */
+.quote-wrapper {
+  position: relative;
+  z-index: 5;
+  margin-top: 38vh;
+  padding: 0 30rpx 0 180rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 收藏按钮 */
+.favorite-btn {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.favorite-btn .heart-icon {
+  font-size: 48rpx;
+  color: #ff6b9d;
+  transition: transform 0.3s ease;
+}
+
+.favorite-btn.favorited .heart-icon {
+  animation: heartBeat 0.5s ease;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.3); }
+  50% { transform: scale(1.1); }
+  75% { transform: scale(1.2); }
+}
+
+.quote-text {
+  font-size: 40rpx;
+  font-weight: 600;
+  font-style: italic;
+  color: #2c2c2c;
+  line-height: 1.8;
+  letter-spacing: 4rpx;
+  text-shadow: 0 0 5rpx rgb(99 195 11);
+  font-family: ZCool, sans-serif;
+}
+
+.quote-author {
+  margin-top: 40rpx;
+  font-size: 32rpx;
+  color: #4a4a4a;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  column-gap: 20rpx;
+}
+
+/* 生成日签按钮 - 清新淡雅渐变版 */
+.share-btn {
+  position: absolute;
+  bottom: 300rpx;
+  z-index: 10;
+  padding: 32rpx 80rpx;
+  background: linear-gradient(135deg, 
+    #f5f0e8 0%, 
+    #e8dfd0 20%,
+    #d5e5e3 50%,
+    #a9c9ca 80%,
+    #d5e5e3 100%
+  );
+  background-size: 200% 200%;
+  border-radius: 60rpx;
+  box-shadow: 
+    0 8rpx 32rpx rgba(93, 78, 55, 0.2),
+    0 4rpx 16rpx rgba(168, 200, 202, 0.25),
+    0 2rpx 8rpx rgba(213, 229, 227, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  border: 2rpx solid rgba(255, 255, 255, 0.9);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  animation: gradientFlow 10s ease infinite;
+}
+
+/* 按钮光泽效果 */
+.share-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  transition: transform 0.6s ease;
+}
+
+.share-btn:active::before {
+  transform: translateX(100%) translateY(100%) rotate(45deg);
+}
+
+.share-btn:active {
+  transform: scale(0.96);
+  box-shadow: 
+    0 4rpx 20rpx rgba(93, 78, 55, 0.25),
+    0 2rpx 10rpx rgba(168, 200, 202, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
+}
+
+.share-btn text {
+  font-size: 32rpx;
+  color: #5d4e37;
+  letter-spacing: 6rpx;
+  font-family: ZCool, sans-serif;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+  text-shadow: 
+    0 1rpx 2rpx rgba(255, 255, 255, 0.9),
+    0 2rpx 4rpx rgba(168, 200, 202, 0.2);
+}
+
+/* 按钮渐变流动动画 */
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+/* 日签预览弹窗 */
+.card-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* 3D翻牌容器 */
+.card-flip-container {
+  width: 560rpx;
+  height: 996rpx;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s ease-in-out;
+}
+
+.card-flip-container.flipped {
+  transform: rotateY(180deg);
+}
+
+/* 卡片面 */
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 16rpx 48rpx rgba(0,0,0,0.4);
+}
+
+/* 卡片背面 */
+.card-back {
+  background: url('https://res.cloudinary.com/kayn-admin-cloud/image/upload/v1774504376/clarity-n-bk_vwvqmq.png') no-repeat;
+  background-size: 100% 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-back-pattern {
+  width: 480rpx;
+  height: 880rpx;
+  border: 4rpx solid rgba(255,255,255,0.3);
+  border-radius: 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(255,255,255,0.08) 0%, transparent 50%);
+}
+
+.pattern-circle {
+  width: 200rpx;
+  height: 200rpx;
+  border: 6rpx solid rgba(255,255,255,0.4);
+  border-radius: 50%;
+  margin-bottom: 60rpx;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+}
+
+.pattern-text {
+  font-size: 36rpx;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 8rpx;
+}
+
+/* 卡片正面 */
+.card-front {
+  transform: rotateY(180deg);
+  background: #d4e4e1;
+}
+
+.card-preview {
+  width: 100%;
+  height: 100%;
+}
+
+.card-actions {
+  margin-top: 30rpx;
+  margin-bottom: 60rpx;
+  animation: fadeInUp 0.5s ease-out 0.3s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.save-btn {
+  background: #fff;
+  color: #3a5060;
+  font-size: 32rpx;
+  padding: 24rpx 80rpx;
+  border-radius: 48rpx;
+  font-weight: 500;
+}
+
+
+/* 隐藏的画布 */
+.card-canvas {
+  position: fixed;
+  left: -9999px;
+  width: 750px;
+  height: 1334px;
+}

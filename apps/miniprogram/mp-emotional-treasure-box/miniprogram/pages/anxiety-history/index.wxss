@@ -1,0 +1,155 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #A8C8CA 0%, #D5E5E3 100%);
+  padding: 40rpx 30rpx 120rpx 30rpx;
+}
+
+/* 头部 */
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #2c3e50;
+  letter-spacing: 4rpx;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: #7f8c8d;
+  letter-spacing: 2rpx;
+}
+
+/* 加载中 */
+.loading {
+  text-align: center;
+  padding: 200rpx 0;
+  font-size: 28rpx;
+  color: #95a5a6;
+}
+
+/* 空状态 */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 0;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #7f8c8d;
+  margin-bottom: 16rpx;
+}
+
+.empty-tip {
+  font-size: 24rpx;
+  color: #95a5a6;
+  margin-bottom: 50rpx;
+}
+
+.empty-btn {
+  padding: 24rpx 60rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50rpx;
+  box-shadow: 0 8rpx 20rpx rgba(102, 126, 234, 0.3);
+}
+
+.empty-btn text {
+  font-size: 28rpx;
+  color: #fff;
+  letter-spacing: 2rpx;
+}
+
+/* 列表 */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.list-item {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.list-item:active {
+  transform: scale(0.98);
+}
+
+.item-content {
+  flex: 1;
+  margin-right: 20rpx;
+}
+
+.item-text {
+  font-size: 30rpx;
+  color: #2c3e50;
+  line-height: 1.6;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-family: 'ZCool', serif;
+}
+
+.item-date {
+  font-size: 22rpx;
+  color: #95a5a6;
+}
+
+.item-delete {
+  padding: 12rpx 24rpx;
+  background: #fee;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+}
+
+.item-delete text {
+  font-size: 24rpx;
+  color: #e74c3c;
+}
+
+/* 底部操作 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 30rpx;
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.95) 30%);
+  display: flex;
+  justify-content: center;
+}
+
+.clear-btn {
+  padding: 24rpx 60rpx;
+  background: #fff;
+  border: 2rpx solid #e74c3c;
+  border-radius: 50rpx;
+  box-shadow: 0 4rpx 12rpx rgba(231, 76, 60, 0.15);
+}
+
+.clear-btn text {
+  font-size: 26rpx;
+  color: #e74c3c;
+  letter-spacing: 2rpx;
+}

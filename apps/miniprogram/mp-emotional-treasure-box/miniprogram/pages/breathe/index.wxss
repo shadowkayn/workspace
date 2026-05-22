@@ -1,0 +1,418 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #A8C8CA 0%, #D5E5E3 100%);
+  padding: 40rpx 30rpx 180rpx 30rpx;
+  font-family: 'ZCool', serif;
+}
+
+/* 标题 */
+.header {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-family: 'ZCool', serif;
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #5d4e37;
+  letter-spacing: 6rpx;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: #8b7355;
+  letter-spacing: 2rpx;
+}
+
+/* 统计卡片 */
+.stats-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.stat-number {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #5d4e37;
+  font-family: 'Georgia', serif;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #8b7355;
+}
+
+.stat-link {
+  font-size: 26rpx;
+  color: #a08060;
+  text-decoration: underline;
+}
+
+.stat-divider {
+  width: 2rpx;
+  height: 60rpx;
+  background: rgba(139, 115, 85, 0.2);
+}
+
+/* 今日记录区域 */
+.today-section {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 24rpx;
+  padding: 40rpx 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.title-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #5d4e37;
+  letter-spacing: 2rpx;
+}
+
+.title-date {
+  font-size: 22rpx;
+  color: #a08060;
+}
+
+/* 今日提示 */
+.today-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 24rpx;
+  background: linear-gradient(135deg, rgba(168, 230, 207, 0.12) 0%, rgba(245, 240, 232, 0.2) 100%);
+  border-radius: 16rpx;
+  border: 2rpx dashed rgba(168, 200, 202, 0.4);
+}
+
+.tip-emoji {
+  font-size: 32rpx;
+}
+
+.tip-message {
+  font-size: 26rpx;
+  color: #5d8070;
+  letter-spacing: 1rpx;
+}
+
+/* 情绪网格 */
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16rpx;
+  margin-bottom: 30rpx;
+}
+
+.mood-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 20rpx 10rpx;
+  background: rgba(245, 240, 232, 0.5);
+  border-radius: 16rpx;
+  border: 3rpx solid transparent;
+  transition: all 0.3s ease;
+}
+
+.mood-item.selected {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.05);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+
+.mood-item.disabled {
+  opacity: 0.6;
+}
+
+.mood-emoji {
+  width: 66rpx;
+  height: 66rpx;
+}
+
+.mood-name {
+  font-size: 22rpx;
+  letter-spacing: 1rpx;
+}
+
+/* 备注输入 */
+.note-section {
+  position: relative;
+  margin-bottom: 30rpx;
+}
+
+.note-input {
+  width: 100%;
+  min-height: 500rpx;
+  padding: 24rpx;
+  box-sizing: border-box;
+  background: rgb(230 237 243);
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  color: #5d4e37;
+  line-height: 1.6;
+  font-family: 'ZCool', serif;
+}
+
+.char-count {
+  position: absolute;
+  bottom: 12rpx;
+  right: 24rpx;
+  font-size: 22rpx;
+  color: #bbb;
+}
+
+/* 备注显示 */
+.note-display {
+  padding: 24rpx;
+  background: rgba(245, 240, 232, 0.5);
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.note-label {
+  display: block;
+  font-size: 22rpx;
+  color: #a08060;
+  margin-bottom: 12rpx;
+}
+
+.note-text {
+  display: block;
+  font-size: 28rpx;
+  color: #5d4e37;
+  line-height: 1.6;
+  font-family: 'ZCool', serif;
+}
+
+/* 保存按钮 */
+.save-btn {
+  padding: 28rpx;
+  background: linear-gradient(225deg, #A9C9CA 0%, #E8F1EF 100%);
+  border-radius: 50rpx;
+  text-align: center;
+  box-shadow: 0 8rpx 20rpx rgba(180, 164, 138, 0.3);
+  transition: all 0.3s ease;
+}
+
+.save-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 12rpx rgba(180, 164, 138, 0.4);
+}
+
+.save-btn text {
+  font-size: 30rpx;
+  color: #5d4e37;
+  font-weight: 600;
+  letter-spacing: 3rpx;
+}
+
+/* 已记录提示 */
+.recorded-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 24rpx;
+  background: rgba(168, 230, 207, 0.2);
+  border-radius: 16rpx;
+  border: 2rpx dashed #a8e6cf;
+}
+
+.tip-icon {
+  font-size: 32rpx;
+  color: #6db89f;
+}
+
+.tip-text {
+  font-size: 26rpx;
+  color: #5d8070;
+  letter-spacing: 1rpx;
+}
+
+/* 最近情绪 */
+.recent-section {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 24rpx;
+  padding: 40rpx 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.title-tip {
+  font-size: 22rpx;
+  color: #a08060;
+  text-decoration: underline;
+}
+
+/* 情绪统计图表 */
+.mood-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.chart-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.chart-label {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  min-width: 140rpx;
+}
+
+.chart-emoji {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.chart-name {
+  font-size: 26rpx;
+  color: #5d4e37;
+  letter-spacing: 1rpx;
+}
+
+.chart-bar-container {
+  flex: 1;
+  height: 48rpx;
+  background: rgba(245, 240, 232, 0.3);
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+
+.chart-bar {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 16rpx;
+  border-radius: 24rpx;
+  min-width: 60rpx;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chart-count {
+  font-size: 24rpx;
+  font-weight: 600;
+  font-family: 'Georgia', serif;
+}
+
+/* 情绪分析提示 */
+.mood-insight {
+  margin-top: 30rpx;
+  padding: 30rpx;
+  background: linear-gradient(135deg, rgba(168, 230, 207, 0.15) 0%, rgba(245, 240, 232, 0.3) 100%);
+  border-radius: 20rpx;
+  border: 2rpx solid rgba(168, 200, 202, 0.3);
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.insight-icon {
+  font-size: 32rpx;
+}
+
+.insight-title {
+  font-size: 26rpx;
+  color: #5d4e37;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+.insight-content {
+  display: flex;
+  align-items: center;
+  column-gap: 10rpx;
+  flex-wrap: wrap;
+  margin-bottom: 16rpx;
+  line-height: 1.6;
+}
+
+.insight-text {
+  font-size: 28rpx;
+  color: #5d4e37;
+  letter-spacing: 1rpx;
+}
+
+.insight-mood {
+  font-size: 30rpx;
+  font-weight: 600;
+  padding: 0 8rpx;
+  letter-spacing: 1rpx;
+}
+
+.insight-tip {
+  padding: 20rpx 24rpx;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16rpx;
+  border-left: 4rpx solid #A8E6CF;
+}
+
+.insight-tip text {
+  font-size: 26rpx;
+  color: #5d8070;
+  line-height: 1.6;
+  letter-spacing: 1rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #8b7355;
+  margin-bottom: 16rpx;
+  letter-spacing: 2rpx;
+}
+
+.empty-tip {
+  font-size: 24rpx;
+  color: #a08060;
+  letter-spacing: 1rpx;
+}
