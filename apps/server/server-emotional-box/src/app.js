@@ -53,11 +53,16 @@ app.get("/", (req, res) => {
 app.get("/health", async (req, res) => {
   const isConnected = await checkDatabaseConnection();
   
+  // 检查微信配置（不调用 API，只检查配置是否存在）
+  const wechatConfigured = !!(process.env.WECHAT_APP_ID && process.env.WECHAT_APP_SECRET);
+  
   res.json({
     status: "ok",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     database: isConnected ? "connected" : "disconnected",
+    wechat: wechatConfigured ? "configured" : "not configured",
+    environment: process.env.NODE_ENV || "development",
   });
 });
 

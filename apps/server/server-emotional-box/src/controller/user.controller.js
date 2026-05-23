@@ -57,11 +57,12 @@ export const UserController = {
   /**
    * 微信小程序登录/注册
    * POST /api/users/wechat-login
+   * Body: { code, nickname?, avatarUrl? }
    */
   wechatLogin: catchAsync(async (req, res) => {
-    const userData = req.body;
+    const loginData = req.body;
 
-    const result = await UserService.getOrCreateUser(userData);
+    const result = await UserService.wechatLogin(loginData);
 
     res.json({
       code: 200,

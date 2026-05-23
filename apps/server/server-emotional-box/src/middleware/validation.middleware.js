@@ -244,7 +244,18 @@ export const validationSchemas = {
   // 微信登录
   wechatLogin: {
     body: {
-      openid: commonRules.openid,
+      code: {
+        type: "string",
+        required: true,
+        minLength: 1,
+        maxLength: 100,
+        messages: {
+          required: "code 不能为空",
+          type: "code 必须是字符串",
+          minLength: "code 不能为空",
+          maxLength: "code 长度不能超过 100",
+        },
+      },
       nickname: commonRules.nickname,
       avatarUrl: commonRules.url,
     },

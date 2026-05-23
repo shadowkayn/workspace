@@ -1,5 +1,7 @@
 import { UserRepository } from "../repository/user.repository.js";
 import { generateToken } from "../middleware/auth.middleware.js";
+import wechatService from "./wechat.service.js";
+import { AppError } from "../middleware/errorHandler.middleware.js";
 
 /**
  * User Service - 业务逻辑层
@@ -102,7 +104,70 @@ export const UserService = {
   },
 
   /**
-   * 根据 openid 获取或创建用户（微信小程序登录场景）
+   * 微信小程序登录
+   * @param {Object} loginData - 登录数据
+   * @param {string} loginData.code - 微信登录 code
+   * @param {string} [loginData.nickname] - 用户昵称
+   * @param {string} [loginData.avatarUrl] - 用户头像
+   * @returns {Promise<Object>} 用户对象和 token
+   */
+  async wechatLogin(loginData) {
+    const { code, nickname, avatarUrl } = loginData;
+
+    if (!code) {
+      throw new AppError("code 不能为空", 400);
+    }
+
+    // 1. 调用微信 API 获取 openid
+    const { openid, session_key, unionid } = await wechatService.code2Session(code);
+
+    // 2. 查找或创建用户
+    let user = await UserRepository.findByOpenid(openid);
+
+    if (!user) {
+      // 新用户，创建账号
+      user = await UserRepository.create({
+        openid,
+        nickname: nickname || "微信用户",
+        avatarUrl: avatarUrl || null,
+      });
+    } else {
+      // 老用户，更新信息（如果提供了新的）
+      const updateData = {};
+      if (nickname && nickname !== user.nickname) {
+        updateData.nickname = nickname;
+      }
+      if (avatarUrl && avatarUrl !== user.avatarUrl) {
+        updateData.avatarUrl = avatarUrl;
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        user = await UserRepository.update(user.id, updateData);
+      }
+    }
+
+    // 3. 生成 JWT token
+    const token = generateToken({
+      userId: user.id,
+      openid: user.openid,
+    });
+
+    return {
+      user: {
+        id: user.id,
+        openid: user.openid,
+        nickname: user.nickname,
+        avatarUrl: user.avatarUrl,
+        createdAt: user.createdAt,
+      },
+      token,
+      // 可以选择性返回 session_key 和 unionid，用于后续解密用户数据
+      // 注意：session_key 不应该传给前端，应该保存在服务器
+    };
+  },
+
+  /**
+   * 根据 openid 获取或创建用户（兼容旧接口，用于测试）
    * @param {Object} userData - 用户数据
    * @param {string} userData.openid - 微信 openid
    * @param {string} [userData.nickname] - 昵称
