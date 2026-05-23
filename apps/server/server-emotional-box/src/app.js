@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import prisma from "./db/index.js";
+import { prisma, connectDatabase, disconnectDatabase, checkDatabaseConnection } from "./db/index.js";
 import routes from "./router/index.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.middleware.js";
 import { requestLogger, detailedLogger } from "./middleware/logger.middleware.js";
@@ -50,12 +50,14 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/health", (req, res) => {
+app.get("/health", async (req, res) => {
+  const isConnected = await checkDatabaseConnection();
+  
   res.json({
     status: "ok",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    database: "connected", // 可以添加数据库连接检查
+    database: isConnected ? "connected" : "disconnected",
   });
 });
 
@@ -65,22 +67,6 @@ app.get("/health", (req, res) => {
 Object.entries(routes).forEach(([path, router]) => {
   app.use(`/api${path}`, router);
   console.log(`✓ 路由已注册: /api${path}`);
-});
-
-// ==================== 数据库连接测试 ====================
-
-// 测试数据库连接
-app.get("/api/db-test", async (req, res, next) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    res.json({
-      code: 200,
-      message: "数据库连接成功",
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    next(error);
-  }
 });
 
 // ==================== 错误处理 ====================
@@ -96,8 +82,15 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
 
-const server = app.listen(PORT, HOST, () => {
-  console.log(`
+// 启动前先连接数据库
+async function startServer() {
+  try {
+    // 1. 连接数据库
+    await connectDatabase();
+    
+    // 2. 启动 HTTP 服务器
+    const server = app.listen(PORT, HOST, () => {
+      console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
 ║   🚀 Emotional Box API Server                        ║
@@ -108,27 +101,61 @@ const server = app.listen(PORT, HOST, () => {
 ║   📚 API 文档: http://localhost:${PORT}/api/users       ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
-  `);
-  
-  console.log("\n已注册的路由:");
-  Object.keys(routes).forEach((path) => {
-    console.log(`  → /api${path}`);
-  });
-  console.log("");
-});
+      `);
+      
+      console.log("\n已注册的路由:");
+      Object.keys(routes).forEach((path) => {
+        console.log(`  → /api${path}`);
+      });
+      console.log("");
+    });
+
+    // 3. 设置优雅关闭
+    setupGracefulShutdown(server);
+    
+  } catch (error) {
+    console.error("❌ 服务器启动失败:", error);
+    process.exit(1);
+  }
+}
+
+// 启动服务器
+startServer();
 
 // ==================== 优雅关闭 ====================
 
-// 处理 SIGTERM 信号（Docker、Kubernetes 等会发送此信号）
-process.on("SIGTERM", async () => {
-  console.log("\n⚠️  收到 SIGTERM 信号，开始优雅关闭...");
-  
+function setupGracefulShutdown(server) {
+  // 处理 SIGTERM 信号（Docker、Kubernetes 等会发送此信号）
+  process.on("SIGTERM", async () => {
+    console.log("\n⚠️  收到 SIGTERM 信号，开始优雅关闭...");
+    await gracefulShutdown(server);
+  });
+
+  // 处理 SIGINT 信号（Ctrl+C）
+  process.on("SIGINT", async () => {
+    console.log("\n⚠️  收到 SIGINT 信号，开始优雅关闭...");
+    await gracefulShutdown(server);
+  });
+
+  // 处理未捕获的异常
+  process.on("uncaughtException", (error) => {
+    console.error("❌ 未捕获的异常:", error);
+    process.exit(1);
+  });
+
+  // 处理未处理的 Promise 拒绝
+  process.on("unhandledRejection", (reason, promise) => {
+    console.error("❌ 未处理的 Promise 拒绝:", reason);
+    process.exit(1);
+  });
+}
+
+async function gracefulShutdown(server) {
   server.close(async () => {
     console.log("✓ HTTP 服务器已关闭");
     
     // 关闭数据库连接
-    await prisma.$disconnect();
-    console.log("✓ 数据库连接已关闭");
+    await disconnectDatabase();
     
     console.log("✓ 服务器已完全关闭");
     process.exit(0);
@@ -139,33 +166,6 @@ process.on("SIGTERM", async () => {
     console.error("❌ 强制关闭服务器（超时）");
     process.exit(1);
   }, 30000);
-});
-
-// 处理 SIGINT 信号（Ctrl+C）
-process.on("SIGINT", async () => {
-  console.log("\n⚠️  收到 SIGINT 信号，开始优雅关闭...");
-  
-  server.close(async () => {
-    console.log("✓ HTTP 服务器已关闭");
-    
-    await prisma.$disconnect();
-    console.log("✓ 数据库连接已关闭");
-    
-    console.log("✓ 服务器已完全关闭");
-    process.exit(0);
-  });
-});
-
-// 处理未捕获的异常
-process.on("uncaughtException", (error) => {
-  console.error("❌ 未捕获的异常:", error);
-  process.exit(1);
-});
-
-// 处理未处理的 Promise 拒绝
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("❌ 未处理的 Promise 拒绝:", reason);
-  process.exit(1);
-});
+}
 
 export default app;

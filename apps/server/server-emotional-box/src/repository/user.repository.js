@@ -1,4 +1,4 @@
-import prisma from "../db/index.js";
+import { prisma } from "../db/index.js";
 
 /**
  * User Repository - 数据访问层
