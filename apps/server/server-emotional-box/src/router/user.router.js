@@ -21,6 +21,9 @@ router.post(
   UserController.wechatLogin
 );
 
+// 测试登录（开发环境使用，返回 token）
+router.post("/test-login", UserController.testLogin);
+
 // ==================== 需要认证的接口 ====================
 
 // 获取当前登录用户信息

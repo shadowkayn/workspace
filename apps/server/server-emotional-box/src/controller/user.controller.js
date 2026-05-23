@@ -100,4 +100,21 @@ export const UserController = {
       data: user,
     });
   }),
+
+  /**
+   * 测试登录（开发环境使用）
+   * POST /api/users/test-login
+   * Body: { openid, nickname?, avatarUrl? }
+   */
+  testLogin: catchAsync(async (req, res) => {
+    const userData = req.body;
+
+    const result = await UserService.getOrCreateUser(userData);
+
+    res.json({
+      code: 200,
+      message: "登录成功",
+      data: result,
+    });
+  }),
 };
