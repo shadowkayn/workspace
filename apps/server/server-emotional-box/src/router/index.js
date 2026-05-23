@@ -4,14 +4,14 @@
  */
 
 import userRouter from "./user.router.js";
+import quoteRouter from "./quote.router.js";
+import moodRecordRouter from "./moodRecord.router.js";
 
 // 路由配置对象
 const routes = {
   "/users": userRouter,
-  // 可以继续添加其他路由
-  // "/quotes": quoteRouter,
-  // "/moods": moodRouter,
-  // "/anxiety": anxietyRouter,
+  "/quotes": quoteRouter,
+  "/mood-records": moodRecordRouter,
 };
 
 export default routes;

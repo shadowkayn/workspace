@@ -36,11 +36,12 @@ model User {
 // 治愈语录表
 // ==========================================
 model Quote {
-  id        String   @id @default(cuid())
-  content   String   @db.Text
-  author    String   @default("佚名")
-  category  String   @default("默认")
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  author      String   @default("佚名")
+  category    String   @default("默认")
+  displayDate DateTime @unique @db.Date // 展示日期（每天一条）
+  createdAt   DateTime @default(now())
 
   // 被收藏的关系
   favoritedBy UserFavorite[]
@@ -62,16 +63,26 @@ model UserFavorite {
 }
 
 // ==========================================
-// 情绪记录表
+// 情绪日记表
 // ==========================================
 model MoodRecord {
   id        String   @id @default(cuid())
   userId    String
-  moodTag   String   // 例如：开心、难过、焦虑
-  note      String?  @db.Text
+  title     String?  // 日记标题
+  content   String   @db.Text // 日记内容
+  mood      String   // 情绪类型：happy, sad, anxious, calm, excited, angry, tired, peaceful
+  moodScore Int      @default(5) // 情绪强度 1-10
+  tags      String[] // 标签数组：工作、生活、学习、感情等
+  weather   String?  // 天气
+  location  String?  // 地点
+  isPrivate Boolean  @default(false) // 是否私密
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, mood])
 }
 
 // ==========================================

@@ -31,6 +31,16 @@ export const errorHandler = (err, req, res, next) => {
 };
 
 /**
+ * 异步处理器包装函数
+ * 自动捕获异步函数中的错误并传递给错误处理中间件
+ */
+export const asyncHandler = (fn) => {
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+};
+
+/**
  * 404 错误处理中间件
  * 处理未匹配到的路由
  */
