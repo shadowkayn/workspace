@@ -126,6 +126,40 @@ export const QuoteController = {
   }),
 
   /**
+   * 收藏语录
+   * POST /api/quotes/:id/favorite
+   */
+  favoriteQuote: catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const favorite = await QuoteService.favoriteQuote(userId, id);
+
+    res.json({
+      code: 200,
+      message: "收藏成功",
+      data: favorite,
+    });
+  }),
+
+  /**
+   * 取消收藏语录
+   * DELETE /api/quotes/:id/favorite
+   */
+  unfavoriteQuote: catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    await QuoteService.unfavoriteQuote(userId, id);
+
+    res.json({
+      code: 200,
+      message: "取消收藏成功",
+      data: { quoteId: id, isFavorited: false },
+    });
+  }),
+
+  /**
    * 更新语录
    * PUT /api/quotes/:id
    */

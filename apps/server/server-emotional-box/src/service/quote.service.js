@@ -221,6 +221,46 @@ export const QuoteService = {
   },
 
   /**
+   * 收藏语录
+   */
+  async favoriteQuote(userId, quoteId) {
+    if (!userId) {
+      throw new Error("请先登录");
+    }
+
+    if (!quoteId) {
+      throw new Error("语录 ID 不能为空");
+    }
+
+    const quote = await QuoteRepository.findById(quoteId);
+    if (!quote) {
+      throw new Error("语录不存在");
+    }
+
+    const favorite = await QuoteRepository.favorite(userId, quoteId);
+
+    return {
+      ...favorite,
+      isFavorited: true,
+    };
+  },
+
+  /**
+   * 取消收藏语录
+   */
+  async unfavoriteQuote(userId, quoteId) {
+    if (!userId) {
+      throw new Error("请先登录");
+    }
+
+    if (!quoteId) {
+      throw new Error("语录 ID 不能为空");
+    }
+
+    return await QuoteRepository.unfavorite(userId, quoteId);
+  },
+
+  /**
    * 更新语录
    */
   async updateQuote(id, data) {

@@ -105,5 +105,9 @@ model BackgroundImage {
   id        String   @id @default(cuid())
   url       String
   name      String?
+  category  String   @default("default")
   isActive  Boolean  @default(true)
+  order     Int      @default(0)
+
+  @@index([category, isActive, order])
 }

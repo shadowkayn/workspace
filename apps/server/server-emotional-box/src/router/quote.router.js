@@ -21,9 +21,6 @@ router.get("/date/:date", optionalAuth, QuoteController.getQuoteByDate);
 // 获取语录列表（可选登录，登录后显示收藏状态）
 router.get("/", optionalAuth, QuoteController.getQuotes);
 
-// 获取单条语录详情（可选登录）
-router.get("/:id", optionalAuth, QuoteController.getQuoteById);
-
 // 随机获取一条语录（可选登录）
 router.get("/random/get", optionalAuth, QuoteController.getRandomQuote);
 
@@ -31,6 +28,15 @@ router.get("/random/get", optionalAuth, QuoteController.getRandomQuote);
 router.get("/categories/list", QuoteController.getCategories);
 
 // ==================== 需要认证的接口 ====================
+
+// 收藏语录
+router.post("/:id/favorite", authenticate, QuoteController.favoriteQuote);
+
+// 取消收藏语录
+router.delete("/:id/favorite", authenticate, QuoteController.unfavoriteQuote);
+
+// 获取单条语录详情（可选登录）
+router.get("/:id", optionalAuth, QuoteController.getQuoteById);
 
 // 创建语录（需要登录，后续可以加管理员权限）
 router.post(

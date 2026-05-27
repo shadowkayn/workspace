@@ -153,4 +153,35 @@ export const QuoteRepository = {
 
     return !!favorite;
   },
+
+  /**
+   * 收藏语录
+   */
+  async favorite(userId, quoteId) {
+    return await prisma.userFavorite.upsert({
+      where: {
+        userId_quoteId: {
+          userId,
+          quoteId,
+        },
+      },
+      update: {},
+      create: {
+        userId,
+        quoteId,
+      },
+    });
+  },
+
+  /**
+   * 取消收藏语录
+   */
+  async unfavorite(userId, quoteId) {
+    return await prisma.userFavorite.deleteMany({
+      where: {
+        userId,
+        quoteId,
+      },
+    });
+  },
 };
