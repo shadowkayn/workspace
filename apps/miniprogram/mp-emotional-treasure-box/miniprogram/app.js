@@ -1,11 +1,16 @@
 // app.js
+const { post, put } = require('./utils/request');
+
 App({
   onLaunch: function () {
     this.globalData = {
       env: "cloud1-7g27vhf9d8bd5dbb",
+      apiBaseUrl: "http://localhost:3000/api",
       fontLoaded: false,
       userInfo: null,
-      openid: null
+      openid: null,
+      token: null,
+      user: null
     };
     
     if (!wx.cloud) {
@@ -41,10 +46,14 @@ App({
     try {
       const userInfo = wx.getStorageSync('userInfo');
       const openid = wx.getStorageSync('openid');
+      const token = wx.getStorageSync('token');
+      const user = wx.getStorageSync('user');
       
-      if (userInfo && openid) {
+      if (userInfo && openid && token) {
         this.globalData.userInfo = userInfo;
         this.globalData.openid = openid;
+        this.globalData.token = token;
+        this.globalData.user = user || null;
       }
     } catch (e) {
       console.error('读取缓存失败', e);
@@ -58,14 +67,15 @@ App({
       wx.login({
         success: (res) => {
           if (res.code) {
-            // 将 code 发送到云函数换取 openid
-            wx.cloud.callFunction({
-              name: 'quickstartFunctions',
-              data: { type: 'getOpenId' }
-            }).then(cloudRes => {
-              this.globalData.openid = cloudRes.result.openid;
-              wx.setStorageSync('openid', cloudRes.result.openid);
-              resolve(cloudRes.result.openid);
+            post('/users/wechat-login', { code: res.code }).then(loginRes => {
+              const { user, token } = loginRes;
+              this.globalData.openid = user.openid;
+              this.globalData.user = user;
+              this.globalData.token = token;
+              wx.setStorageSync('openid', user.openid);
+              wx.setStorageSync('user', user);
+              wx.setStorageSync('token', token);
+              resolve(user.openid);
             }).catch(reject);
           } else {
             reject(new Error('获取 code 失败'));
@@ -79,7 +89,7 @@ App({
   // 检查登录状态（需要用户授权信息）
   checkLogin() {
     // 必须同时有 openid 和 userInfo 才算登录
-    return !!(this.globalData.openid && this.globalData.userInfo);
+    return !!(this.globalData.openid && this.globalData.userInfo && this.globalData.token);
   },
 
   // 获取用户信息（需要用户授权）
@@ -115,20 +125,16 @@ App({
     });
   },
 
-  // 保存用户信息到云数据库
+  // 保存用户信息到后端
   saveUserInfo(userInfo) {
-    if (!this.globalData.openid) return;
-    
-    const db = wx.cloud.database();
-    // 使用 doc().set() 时不需要传 _id，文档 ID 已经在 doc() 中指定
-    // 这样可以实现：如果文档不存在则创建，存在则更新
-    db.collection('Users').doc(this.globalData.openid).set({
-      data: {
-        userInfo: userInfo,
-        openid: this.globalData.openid,
-        updateTime: db.serverDate()
-      }
-    }).then(() => {
+    if (!this.globalData.user || !this.globalData.user.id || !this.globalData.token) return;
+
+    put(`/users/${this.globalData.user.id}`, {
+      nickname: userInfo.nickName,
+      avatarUrl: userInfo.avatarUrl
+    }).then((user) => {
+      this.globalData.user = user;
+      wx.setStorageSync('user', user);
     }).catch(err => {
       console.error('❌ 保存用户信息失败', err);
     });

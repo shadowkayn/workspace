@@ -1,5 +1,15 @@
 const bgAudioManager = wx.getBackgroundAudioManager();
-const { checkLoginWithTip, formatDate, generateQuoteCard, getRandomBgImage } = require('../../utils/index');
+const {
+  checkLoginWithTip,
+  formatDate,
+  generateQuoteCard,
+  getRandomBgImage,
+  get,
+  post,
+  del
+} = require('../../utils/index');
+
+const DEFAULT_CLARITY_BG = 'https://res.cloudinary.com/kayn-admin-cloud/image/upload/v1774504376/clarity-n-bk_vwvqmq.png';
 
 // 音乐列表 - 上传到云存储后把 URL 填这里
 const MUSIC_LIST = [
@@ -41,33 +51,22 @@ Page({
 
   // 加载背景图列表
   loadBackgroundImages() {
-    const db = wx.cloud.database();
-    db.collection('BackgroundImages')
-      .where({
-        category: 'clarity',
-        isActive: true
-      })
-      .orderBy('order', 'asc')
-      .limit(100) // 增加查询数量限制
-      .get()
+    get('/background-images', { category: 'clarity', limit: 100 })
       .then(res => {
-        if (res.data && res.data.length > 0) {
-          this.setData({ bgImages: res.data });
+        const images = res.images || [];
+        if (images.length > 0) {
+          this.setData({ bgImages: images });
           // 随机选择一张背景图
           this.setRandomBackground();
         } else {
           // 如果数据库没有数据，使用默认背景
-          this.setData({ 
-            bgImage: 'https://res.cloudinary.com/kayn-admin-cloud/image/upload/v1774504376/clarity-n-bk_vwvqmq.png' 
-          });
+          this.setData({ bgImage: DEFAULT_CLARITY_BG });
         }
       })
       .catch(err => {
         console.error('加载背景图失败', err);
         // 失败时使用默认背景
-        this.setData({ 
-          bgImage: 'https://res.cloudinary.com/kayn-admin-cloud/image/upload/v1774504376/clarity-n-bk_vwvqmq.png' 
-        });
+        this.setData({ bgImage: DEFAULT_CLARITY_BG });
       });
   },
 
@@ -139,68 +138,52 @@ Page({
 
   // 获取每日语录（按日期精准匹配）
   fetchQuote() {
-    const db = wx.cloud.database();
-    const today = this.formatDate(new Date()).replace(/\./g, '-'); // 将 2026.04.01 转为 2026-04-01
-
-    db.collection('Quotes').where({
-      displayDate: today
-    }).get().then(res => {
-      if (res.data && res.data.length > 0) {
-        const item = res.data[0];
-        this.setData({
-          quote: item.content,
-          author: item.author,
-          quoteId: item._id // 记录ID，方便收藏使用
-        }, () => {
-          this.checkFavoriteStatus(); // 拿到语录后再检查收藏
-        });
-      } else {
-        // 如果当天没配数据，随机拿一条兜底
-        this.fetchRandomQuote();
-      }
+    get('/quotes/today').then(item => {
+      this.applyQuote(item);
     }).catch(err => {
-      console.error('数据库查询失败', err);
+      console.error('获取今日语录失败，尝试随机语录', err);
+      this.fetchRandomQuote();
     });
   },
 
   // 兜底随机获取逻辑
   fetchRandomQuote() {
-    const db = wx.cloud.database();
-    db.collection('Quotes').aggregate().sample({ size: 1 }).end().then(res => {
-      if (res.list.length > 0) {
-        const item = res.list[0];
-        this.setData({
-          quote: item.content,
-          author: item.author,
-          quoteId: item._id
-        }, () => {
-          this.checkFavoriteStatus(); // 拿到语录后再检查收藏
-        });
-      }
+    get('/quotes/random/get').then(item => {
+      this.applyQuote(item);
+    }).catch(err => {
+      console.error('获取随机语录失败', err);
+      wx.showToast({ title: '语录加载失败', icon: 'none' });
     });
   },
 
-  // 切换收藏状态（存入云数据库）
+  applyQuote(item) {
+    if (!item) return;
+
+    this.setData({
+      quote: item.content,
+      author: item.author,
+      quoteId: item.id,
+      isFavorited: !!item.isFavorited
+    });
+  },
+
+  // 切换收藏状态（存入后端）
   async toggleFavorite() {
     // 使用工具函数检查登录
     if (!checkLoginWithTip({ content: '收藏功能需要登录后使用' })) {
       return;
     }
 
-    const db = wx.cloud.database();
-    const { quote, author, quoteId, isFavorited } = this.data;
+    const { quoteId, isFavorited } = this.data;
+
+    if (!quoteId) {
+      wx.showToast({ title: '语录加载中', icon: 'none' });
+      return;
+    }
 
     if (!isFavorited) {
-      // 添加收藏 - _openid 会自动添加
       try {
-        await db.collection('UserFavorites').add({
-          data: {
-            quote_id: quoteId,
-            content: quote,
-            author: author,
-            createdAt: db.serverDate()
-          }
-        });
+        await post(`/quotes/${quoteId}/favorite`);
         this.setData({ isFavorited: true });
         wx.showToast({ title: '已加入拾光宝盒', icon: 'success' });
       } catch (e) {
@@ -208,12 +191,8 @@ Page({
         wx.showToast({ title: '收藏失败', icon: 'none' });
       }
     } else {
-      // 取消收藏 - 只删除当前用户的收藏
       try {
-        const _ = db.command;
-        await db.collection('UserFavorites').where({
-          quote_id: quoteId
-        }).remove();
+        await del(`/quotes/${quoteId}/favorite`);
         this.setData({ isFavorited: false });
         wx.showToast({ title: '已移出拾光宝盒', icon: 'none' });
       } catch (e) {
@@ -223,12 +202,12 @@ Page({
     }
   },
 
-  // 检查云端收藏状态 - 只查询当前用户的收藏
+  // 检查后端收藏状态 - 只查询当前用户的收藏
   checkFavoriteStatus() {
     const app = getApp();
     const isLogin = app.checkLogin();
 
-    // 如果用户未登录，直接设置为未收藏状态，不调用云函数
+    // 如果用户未登录，直接设置为未收藏状态，不调用接口
     if (!isLogin) {
       this.setData({ isFavorited: false });
       return;
@@ -240,12 +219,8 @@ Page({
       return;
     }
 
-    const db = wx.cloud.database();
-    // 云数据库会自动过滤当前用户的数据（基于 _openid）
-    db.collection('UserFavorites').where({
-      quote_id: this.data.quoteId
-    }).count().then(res => {
-      this.setData({ isFavorited: res.total > 0 });
+    get(`/quotes/${this.data.quoteId}`).then(quote => {
+      this.setData({ isFavorited: !!quote.isFavorited });
     }).catch(err => {
       console.error('❌ 检查收藏状态失败', err);
       this.setData({ isFavorited: false });

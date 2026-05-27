@@ -2,6 +2,8 @@
  * 常量配置
  */
 
+const { get } = require('./request');
+
 // 日签背景图列表 - 默认备用（数据库加载失败时使用）
 const CARD_BG_LIST = [
   'https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6?w=800&q=80',
@@ -17,42 +19,16 @@ const CARD_BG_LIST = [
  */
 async function getRandomBgImage() {
   try {
-    const db = wx.cloud.database();
-    
-    // 先查询总数
-    const countRes = await db.collection('BackgroundImages')
-      .where({
-        category: 'card',
-        isActive: true
-      })
-      .count();
+    const res = await get('/background-images', { category: 'card', limit: 100 });
+    const images = res.images || [];
 
-    if (countRes.total === 0) {
-      console.warn('⚠️ 数据库没有背景图数据，使用默认列表');
-      return CARD_BG_LIST[Math.floor(Math.random() * CARD_BG_LIST.length)];
-    }
-    
-    // 随机选择一个跳过的数量
-    const randomSkip = Math.floor(Math.random() * countRes.total);
-    
-    // 查询一条数据
-    const res = await db.collection('BackgroundImages')
-      .where({
-        category: 'card',
-        isActive: true
-      })
-      .skip(randomSkip)
-      .limit(1)
-      .get();
-    
-    if (res.data && res.data.length > 0) {
-      const selectedBg = res.data[0];
-
+    if (images.length > 0) {
+      const selectedBg = images[Math.floor(Math.random() * images.length)];
       return selectedBg.url;
-    } else {
-      console.warn('⚠️ 查询失败，使用默认列表');
-      return CARD_BG_LIST[Math.floor(Math.random() * CARD_BG_LIST.length)];
     }
+
+    console.warn('⚠️ 后端没有背景图数据，使用默认列表');
+    return CARD_BG_LIST[Math.floor(Math.random() * CARD_BG_LIST.length)];
   } catch (err) {
     console.error('❌ 获取背景图失败，使用默认背景', err);
     return CARD_BG_LIST[Math.floor(Math.random() * CARD_BG_LIST.length)];

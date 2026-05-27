@@ -7,6 +7,7 @@ const date = require('./date');
 const canvas = require('./canvas');
 const constants = require('./constants');
 const security = require('./security');
+const request = require('./request');
 
 module.exports = {
   // 认证相关
@@ -22,5 +23,8 @@ module.exports = {
   ...constants,
   
   // 安全检测
-  ...security
+  ...security,
+
+  // HTTP 请求
+  ...request
 };
