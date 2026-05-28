@@ -1,4 +1,5 @@
 {
+  "cloud": false,
   "pages": [
     "pages/clarity/index",
     "pages/release/index",
