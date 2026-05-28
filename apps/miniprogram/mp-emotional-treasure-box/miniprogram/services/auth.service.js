@@ -41,20 +41,43 @@ function restoreLoginFromStorage() {
 
 function login() {
   return new Promise((resolve, reject) => {
-    wx.login({
-      success: (res) => {
-        if (!res.code) {
-          reject(new Error('获取 code 失败'));
-          return;
-        }
+    // 第一步：获取用户信息（需要用户授权）
+    wx.getUserProfile({
+      desc: '用于完善用户资料和提供个性化服务',
+      success: (profileRes) => {
+        const userInfo = profileRes.userInfo;
+        
+        // 第二步：获取微信登录 code
+        wx.login({
+          success: (loginRes) => {
+            if (!loginRes.code) {
+              reject(new Error('获取 code 失败'));
+              return;
+            }
 
-        userApi.wechatLogin({ code: res.code })
-          .then((loginData) => {
-            resolve(syncLoginState(loginData));
-          })
-          .catch(reject);
+            // 第三步：发送到后端（包含 code 和用户信息）
+            userApi.wechatLogin({
+              code: loginRes.code,
+              nickname: userInfo.nickName,
+              avatarUrl: userInfo.avatarUrl
+            })
+              .then((loginData) => {
+                // 保存用户信息到本地
+                const app = getAppInstance();
+                app.globalData.userInfo = userInfo;
+                wx.setStorageSync('userInfo', userInfo);
+                
+                resolve(syncLoginState(loginData));
+              })
+              .catch(reject);
+          },
+          fail: reject
+        });
       },
-      fail: reject
+      fail: (err) => {
+        console.error('❌ 获取用户信息失败', err);
+        reject(new Error('获取用户信息失败，请授权后重试'));
+      }
     });
   });
 }

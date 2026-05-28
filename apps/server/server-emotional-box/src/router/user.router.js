@@ -13,16 +13,18 @@ const router = express.Router();
 // ==================== 公开接口（无需认证） ====================
 
 // 微信小程序登录/注册（返回 token）
-// 应用登录限流和参数验证
+// 开发环境：暂时禁用限流，方便调试
+// 生产环境：需要启用限流防止暴力破解
 router.post(
   "/wechat-login",
-  rateLimitPresets.login,
+  // rateLimitPresets.login, // 开发环境暂时注释
   validate(validationSchemas.wechatLogin),
   UserController.wechatLogin
 );
 
 // 测试登录（开发环境使用，返回 token）
-router.post("/test-login", UserController.testLogin);
+// 使用宽松限流，方便开发调试
+router.post("/test-login", rateLimitPresets.loose, UserController.testLogin);
 
 // ==================== 需要认证的接口 ====================
 
