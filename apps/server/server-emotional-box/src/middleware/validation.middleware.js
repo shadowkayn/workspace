@@ -217,11 +217,22 @@ export const commonRules = {
     maxLength: 50,
   },
 
-  // URL 验证
+  // URL 验证（可选）
   url: {
     type: "string",
     pattern: /^https?:\/\/.+/,
     patternMessage: "必须是有效的 URL",
+  },
+
+  // URL 验证（可选，允许为空）
+  optionalUrl: {
+    type: "string",
+    custom: (value) => {
+      if (value && !/^https?:\/\/.+/.test(value)) {
+        return "必须是有效的 URL";
+      }
+      return null;
+    },
   },
 
   // 分页参数
@@ -268,7 +279,7 @@ export const validationSchemas = {
     },
     body: {
       nickname: commonRules.nickname,
-      avatarUrl: commonRules.url,
+      avatarUrl: commonRules.optionalUrl,
     },
   },
 

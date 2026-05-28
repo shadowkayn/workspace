@@ -4,7 +4,9 @@ const authService = require('./services/auth.service');
 App({
   onLaunch: function () {
     this.globalData = {
-      apiBaseUrl: "http://localhost:3000/api",
+      // 开发环境：使用本地 IP 地址
+      // 生产环境：使用线上域名
+      apiBaseUrl: "http://192.168.20.49:3000/api", // 本地开发
       fontLoaded: false,
       userInfo: null,
       openid: null,

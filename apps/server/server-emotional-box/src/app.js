@@ -37,7 +37,10 @@ if (process.env.NODE_ENV === "development") {
 // ==================== 全局限流 ====================
 
 // 对所有接口应用宽松限流（1 小时 1000 次）
-app.use(rateLimitPresets.loose);
+// 开发环境：禁用全局限流，方便调试
+if (process.env.NODE_ENV === "production") {
+  app.use(rateLimitPresets.loose);
+}
 
 // ==================== 健康检查 ====================
 
