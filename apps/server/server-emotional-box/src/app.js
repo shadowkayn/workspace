@@ -73,8 +73,22 @@ app.get("/health", async (req, res) => {
 
 // 动态注册所有路由
 Object.entries(routes).forEach(([path, router]) => {
+  console.log(`📝 注册路由: /api${path}`, typeof router, router.stack ? `(${router.stack.length} routes)` : '(no stack)');
   app.use(`/api${path}`, router);
   console.log(`✓ 路由已注册: /api${path}`);
+});
+
+// 测试：手动注册一个简单路由
+app.post('/api/upload/test', (req, res) => {
+  res.json({ message: 'test route works' });
+});
+
+console.log('✓ 测试路由已注册: /api/upload/test');
+
+// 添加一个捕获所有请求的中间件来调试
+app.use((req, res, next) => {
+  console.log('🔍 收到请求:', req.method, req.originalUrl);
+  next();
 });
 
 // ==================== 错误处理 ====================

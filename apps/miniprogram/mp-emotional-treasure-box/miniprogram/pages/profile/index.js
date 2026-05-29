@@ -1,4 +1,6 @@
 // pages/profile/index.js
+const userApi = require('../../api/user');
+
 Page({
   data: {
     userInfo: null,
@@ -70,7 +72,8 @@ Page({
               this.setData({
                 showProfileDialog: true,
                 tempNickname: '',
-                tempAvatarUrl: ''
+                tempAvatarUrl: '',
+                isLogin: false // 标记为首次登录状态
               });
             } else {
               // 非首次登录，直接登录成功
@@ -104,9 +107,27 @@ Page({
     });
   },
 
+  // 编辑资料（已登录用户点击头像）
+  handleEditProfile() {
+    if (!this.data.isLogin) {
+      // 未登录，触发登录
+      this.handleLogin();
+      return;
+    }
+
+    // 已登录，打开编辑弹窗
+    const { userInfo } = this.data;
+    this.setData({
+      showProfileDialog: true,
+      tempNickname: userInfo.nickName || '',
+      tempAvatarUrl: userInfo.avatarUrl || ''
+    });
+  },
+
   // 选择头像
   onChooseAvatar(e) {
     const { avatarUrl } = e.detail;
+    console.log('✓ 选择头像:', avatarUrl);
     this.setData({
       tempAvatarUrl: avatarUrl
     });
@@ -124,7 +145,7 @@ Page({
     // 阻止点击弹窗内容时关闭弹窗
   },
 
-  // 取消填写
+  // 取消填写（首次登录时）
   handleCancelProfile() {
     this.setData({
       showProfileDialog: false
@@ -138,6 +159,15 @@ Page({
     wx.clearStorageSync();
     
     wx.showToast({ title: '已取消登录', icon: 'none' });
+  },
+
+  // 关闭弹窗（已登录用户编辑时）
+  handleCloseDialog() {
+    this.setData({
+      showProfileDialog: false,
+      tempNickname: '',
+      tempAvatarUrl: ''
+    });
   },
 
   // 确认保存
@@ -158,19 +188,41 @@ Page({
     
     wx.showLoading({ title: '保存中...' });
     
+    // 如果选择了头像，先上传头像
+    if (tempAvatarUrl && !tempAvatarUrl.startsWith('https://')) {
+      this.uploadAvatarAndSave(tempNickname, tempAvatarUrl);
+    } else {
+      // 没有选择头像或已经是 https URL，直接保存
+      this.saveUserProfile(tempNickname, tempAvatarUrl);
+    }
+  },
+
+  // 上传头像并保存
+  uploadAvatarAndSave(nickname, tempAvatarPath) {
+    userApi.uploadAvatar(tempAvatarPath)
+      .then((data) => {
+        this.saveUserProfile(nickname, data.avatarUrl);
+      })
+      .catch((err) => {
+        wx.hideLoading();
+        console.error('❌ 头像上传失败', err);
+        wx.showToast({ title: err.message || '头像上传失败，请重试', icon: 'none' });
+      });
+  },
+
+  // 保存用户资料
+  saveUserProfile(nickname, avatarUrl) {
+    const app = getApp();
     const { put } = require('../../utils/request');
     
     // 构建更新数据
     const updateData = {
-      nickname: tempNickname.trim()
+      nickname: nickname.trim()
     };
     
-    // 检查是否选择了头像（临时路径）
-    const hasSelectedAvatar = tempAvatarUrl && tempAvatarUrl.length > 0;
-    
-    // 只有当头像是有效的 https URL 时才传递
-    if (tempAvatarUrl && tempAvatarUrl.startsWith('https://')) {
-      updateData.avatarUrl = tempAvatarUrl;
+    // 如果有头像 URL，添加到更新数据
+    if (avatarUrl && avatarUrl.startsWith('https://')) {
+      updateData.avatarUrl = avatarUrl;
     }
     
     put(`/users/${app.globalData.user.id}`, updateData)
@@ -178,11 +230,9 @@ Page({
         app.globalData.user = user;
         wx.setStorageSync('user', user);
         
-        // 如果用户选择了临时头像，使用临时路径显示（仅本地）
-        // 注意：临时路径在小程序重启后会失效
         const userInfo = {
           nickName: user.nickname,
-          avatarUrl: hasSelectedAvatar && tempAvatarUrl ? tempAvatarUrl : (user.avatarUrl || '/images/avatar.png')
+          avatarUrl: user.avatarUrl || '/images/avatar.png'
         };
         
         app.globalData.userInfo = userInfo;
@@ -196,16 +246,12 @@ Page({
         
         wx.hideLoading();
         
-        // 如果选择了临时头像，提示用户
-        if (hasSelectedAvatar && !tempAvatarUrl.startsWith('https://')) {
-          wx.showToast({ 
-            title: '登录成功（头像暂存本地）', 
-            icon: 'success',
-            duration: 2000
-          });
-        } else {
-          wx.showToast({ title: '登录成功', icon: 'success' });
-        }
+        // 判断是首次登录还是编辑
+        const isFirstLogin = !this.data.isLogin;
+        wx.showToast({ 
+          title: isFirstLogin ? '登录成功' : '保存成功', 
+          icon: 'success' 
+        });
       })
       .catch((err) => {
         wx.hideLoading();

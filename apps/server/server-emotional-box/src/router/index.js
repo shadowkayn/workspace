@@ -8,6 +8,7 @@ import quoteRouter from "./quote.router.js";
 import moodRecordRouter from "./moodRecord.router.js";
 import anxietyHistoryRouter from "./anxietyHistory.router.js";
 import backgroundImageRouter from "./backgroundImage.router.js";
+import uploadRouter from "./upload.router.js";
 
 // 路由配置对象
 const routes = {
@@ -16,6 +17,7 @@ const routes = {
   "/mood-records": moodRecordRouter,
   "/anxiety-records": anxietyHistoryRouter,
   "/background-images": backgroundImageRouter,
+  "/upload": uploadRouter,
 };
 
 export default routes;

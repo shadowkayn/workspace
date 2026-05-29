@@ -111,3 +111,22 @@ model BackgroundImage {
 
   @@index([category, isActive, order])
 }
+
+// ==========================================
+// 图片缓存表（文件去重）
+// ==========================================
+model ImageCache {
+  id           String   @id @default(cuid())
+  fileHash     String   @unique // 文件 MD5 哈希值
+  cloudinaryUrl String  // Cloudinary URL
+  publicId     String   // Cloudinary public_id
+  fileSize     Int      // 文件大小（字节）
+  mimeType     String   // 文件类型
+  width        Int?     // 图片宽度
+  height       Int?     // 图片高度
+  uploadCount  Int      @default(1) // 上传次数（去重统计）
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([fileHash])
+}

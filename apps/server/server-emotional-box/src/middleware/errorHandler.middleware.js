@@ -45,6 +45,7 @@ export const asyncHandler = (fn) => {
  * 处理未匹配到的路由
  */
 export const notFoundHandler = (req, res, next) => {
+  console.log('⚠️  404 Handler 被调用:', req.method, req.originalUrl);
   res.status(404).json({
     code: 404,
     message: `路由 ${req.method} ${req.originalUrl} 不存在`,
