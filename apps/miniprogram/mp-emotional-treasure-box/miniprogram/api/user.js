@@ -1,9 +1,13 @@
-const { post, put } = require('../utils/request');
+const { get, post, put } = require('../utils/request');
 
 function getUploadUrl(path) {
   const app = getApp();
   const baseUrl = (app.globalData.apiBaseUrl || 'http://localhost:3000/api').replace(/\/$/, '');
   return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
+function getUserById(id) {
+  return get(`/users/${id}`);
 }
 
 function wechatLogin(data) {
@@ -50,6 +54,7 @@ function uploadAvatar(filePath) {
 }
 
 module.exports = {
+  getUserById,
   wechatLogin,
   updateUser,
   uploadAvatar

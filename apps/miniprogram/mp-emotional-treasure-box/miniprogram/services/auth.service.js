@@ -33,10 +33,37 @@ function restoreLoginFromStorage() {
       app.globalData.openid = openid;
       app.globalData.token = token;
       app.globalData.user = user || null;
+      
+      // 静默验证 token 是否有效
+      validateToken().catch(() => {
+        // Token 无效，清除登录状态
+        console.log('Token 已失效，清除登录状态');
+        logout();
+      });
     }
   } catch (err) {
     console.error('读取缓存失败', err);
   }
+}
+
+// 验证 token 是否有效
+function validateToken() {
+  const app = getAppInstance();
+  
+  if (!app.globalData.token || !app.globalData.user) {
+    return Promise.reject(new Error('未登录'));
+  }
+  
+  // 调用一个简单的接口验证 token（比如获取用户信息）
+  return userApi.getUserById(app.globalData.user.id)
+    .then(() => {
+      console.log('Token 验证成功');
+      return true;
+    })
+    .catch((err) => {
+      console.error('Token 验证失败', err);
+      return Promise.reject(err);
+    });
 }
 
 function login() {
@@ -152,6 +179,7 @@ function logout() {
 
 module.exports = {
   restoreLoginFromStorage,
+  validateToken,
   login,
   checkLogin,
   getUserProfile,

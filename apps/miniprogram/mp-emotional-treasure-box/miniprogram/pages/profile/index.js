@@ -25,10 +25,38 @@ Page({
   // 检查登录状态
   checkLoginStatus() {
     const app = getApp();
+    const hasLocalLogin = app.checkLogin();
+    
+    // 先用本地状态更新 UI
     this.setData({
-      isLogin: app.checkLogin(),
+      isLogin: hasLocalLogin,
       userInfo: app.globalData.userInfo
     });
+    
+    // 如果本地显示已登录，静默验证 token 是否有效
+    if (hasLocalLogin && app.globalData.user && app.globalData.user.id) {
+      const { get } = require('../../utils/request');
+      
+      get(`/users/${app.globalData.user.id}`)
+        .then(() => {
+          // Token 有效，保持登录状态
+          console.log('✓ Token 验证成功');
+        })
+        .catch((err) => {
+          // Token 无效，清除登录状态并更新 UI
+          console.log('✗ Token 验证失败，清除登录状态');
+          
+          app.globalData.token = null;
+          app.globalData.openid = null;
+          app.globalData.user = null;
+          app.globalData.userInfo = null;
+          
+          this.setData({
+            isLogin: false,
+            userInfo: null
+          });
+        });
+    }
   },
 
   // 一键登录

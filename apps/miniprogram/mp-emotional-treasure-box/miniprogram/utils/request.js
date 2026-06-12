@@ -40,7 +40,20 @@ function request(options) {
         }
 
         if (res.statusCode === 401) {
+          // Token 失效，清除所有登录信息
           wx.removeStorageSync('token');
+          wx.removeStorageSync('openid');
+          wx.removeStorageSync('user');
+          wx.removeStorageSync('userInfo');
+          
+          // 清除 globalData
+          const app = getApp();
+          if (app) {
+            app.globalData.token = null;
+            app.globalData.openid = null;
+            app.globalData.user = null;
+            app.globalData.userInfo = null;
+          }
         }
 
         reject(new Error(body.message || `请求失败(${res.statusCode})`));
