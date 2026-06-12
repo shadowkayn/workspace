@@ -88,16 +88,29 @@
   width: 400rpx;
   height: 88rpx;
   line-height: 88rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-  font-size: 32rpx;
+  background: linear-gradient(135deg, rgba(245, 250, 255, 0.96) 0%, rgba(235, 245, 250, 0.96) 100%);
+  color: #647b85;
+  font-size: 30rpx;
+  font-weight: 500;
   border-radius: 44rpx;
   margin-bottom: 16rpx;
   border: none;
-  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+  box-shadow: 0 6rpx 20rpx rgba(168, 200, 202, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
+  letter-spacing: 2rpx;
+  transition: all 0.3s ease;
+}
+
+.login-btn::after {
+  border: none;
+}
+
+.login-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 12rpx rgba(168, 200, 202, 0.3);
+  background: linear-gradient(135deg, rgba(240, 248, 253, 0.98) 0%, rgba(230, 242, 248, 0.98) 100%);
 }
 
 .login-btn::after {
