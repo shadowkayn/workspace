@@ -158,13 +158,16 @@ Page({
       // 获取最近7天的记录
       const res = await get('/mood-records', { page: 1, pageSize: 1000 });
       
+      // res 格式：{ data: [...], pagination: {...} }
+      const allRecords = res.data || [];
+      
       // 计算7天前的日期
       const today = new Date();
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(today.getDate() - 6);
       
       // 过滤最近7天的数据
-      const recentData = res.records.filter(item => {
+      const recentData = allRecords.filter(item => {
         const recordDate = new Date(item.createdAt);
         return recordDate >= sevenDaysAgo;
       });
@@ -182,7 +185,7 @@ Page({
       
       this.setData({ 
         recentMoods: formattedData,
-        totalRecords: res.pagination.total
+        totalRecords: res.pagination?.total || 0
       });
       
       this.calculateMoodStats(recentData);

@@ -31,8 +31,9 @@ Page({
       
       wx.hideLoading();
       
-      // res 结构：{ data: { favorites: [...], pagination: {...} }, pagination: {...} }
-      const favoritesData = res.data?.favorites || res.favorites || [];
+      // res 结构：{ favorites: [...], pagination: {...} }
+      // 因为 body.pagination 不存在（pagination 在 body.data 内），request.js 直接返回 body.data
+      const favoritesData = res.favorites || [];
       
       // 格式化数据以适配页面显示
       const favorites = favoritesData.map(item => ({

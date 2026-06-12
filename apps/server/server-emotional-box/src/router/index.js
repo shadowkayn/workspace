@@ -9,6 +9,7 @@ import moodRecordRouter from "./moodRecord.router.js";
 import anxietyHistoryRouter from "./anxietyHistory.router.js";
 import backgroundImageRouter from "./backgroundImage.router.js";
 import uploadRouter from "./upload.router.js";
+import securityRouter from "./security.router.js";
 
 // 路由配置对象
 const routes = {
@@ -18,6 +19,7 @@ const routes = {
   "/anxiety-records": anxietyHistoryRouter,
   "/background-images": backgroundImageRouter,
   "/upload": uploadRouter,
+  "/security": securityRouter,
 };
 
 export default routes;

@@ -130,3 +130,21 @@ model ImageCache {
 
   @@index([fileHash])
 }
+
+// ==========================================
+// 内容安全检测日志表
+// ==========================================
+model SecurityLog {
+  id          String   @id @default(cuid())
+  userId      String?  // 用户ID（可选）
+  content     String   @db.Text // 检测内容（限制长度）
+  contentType String   @default("text") // 内容类型
+  result      String   // 检测结果：pass, review, risky
+  label       String?  // 标签（JSON）
+  score       Int?     // 分数
+  suggestion  String   // 建议：pass, review, risky
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([result, createdAt])
+}

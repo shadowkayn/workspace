@@ -56,7 +56,8 @@ Page({
     try {
       const res = await get('/mood-records', { page: 1, pageSize: 1000 });
       
-      const records = res.records.map(item => ({
+      // res 格式：{ data: [...], pagination: {...} }
+      const records = (res.data || []).map(item => ({
         ...item,
         dateStr: this.formatDateTime(item.createdAt),
         note: item.content // API返回的是content字段

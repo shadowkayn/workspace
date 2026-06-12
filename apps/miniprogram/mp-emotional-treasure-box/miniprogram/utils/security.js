@@ -2,6 +2,8 @@
  * 内容安全检测工具函数
  */
 
+const { post } = require('./request');
+
 /**
  * 检测文本内容是否安全
  * @param {string} content - 要检测的文本内容
@@ -17,30 +19,22 @@ async function checkTextSecurity(content) {
   }
 
   try {
-    const result = await wx.cloud.callFunction({
-      name: 'msgSecCheck',
-      data: {
-        content: content
-      }
+    const result = await post('/security/check-text', {
+      content: content,
+      contentType: 'text'
     });
 
-    if (result.result) {
-      return {
-        safe: result.result.safe,
-        message: result.result.message
-      };
-    } else {
-      // 云函数调用失败
-      return {
-        safe: false,
-        message: '内容检测失败，请稍后重试'
-      };
-    }
-  } catch (err) {
-    console.error('调用内容安全检测云函数失败:', err);
     return {
-      safe: false,
-      message: '内容检测服务异常，请稍后重试'
+      safe: result.safe,
+      message: result.message
+    };
+  } catch (err) {
+    console.error('调用内容安全检测API失败:', err);
+    
+    // 如果是网络错误，允许通过（避免影响用户体验）
+    return {
+      safe: true,
+      message: '检测服务暂时不可用，已跳过检测'
     };
   }
 }

@@ -18,7 +18,7 @@ App({
     wx.loadFontFace({
       global: true,
       family: 'ZCool',
-      source: 'url("https://cdn.jsdelivr.net/gh/shadowkayn/mini-assets@main/fonts/ZhiMangXing-Regular.woff2")',
+      source: 'url("https://cdn.jsdelivr.net/gh/shadowkayn/mini-assets@main/fonts/ZCOOLXiaoWei-Regular.ttf")',
       scopes: ['webview', 'native'],
       success: (res) => {
         this.globalData.fontLoaded = true;
