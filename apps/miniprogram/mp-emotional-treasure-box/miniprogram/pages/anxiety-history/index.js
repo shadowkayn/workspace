@@ -1,4 +1,4 @@
-const { checkLogin, formatDate } = require('../../utils/index');
+const { checkLogin, formatDate, get, del } = require('../../utils/index');
 
 Page({
   data: {
@@ -34,32 +34,15 @@ Page({
     }
 
     this.setData({ loading: true });
-    const db = wx.cloud.database();
     
     try {
-      // 先获取总数
-      const countResult = await db.collection('AnxietyHistory').count();
-      const total = countResult.total;
-      
-      // 分批查询所有数据
-      const batchSize = 100;
-      const batchCount = Math.ceil(total / batchSize);
-      const tasks = [];
-      
-      for (let i = 0; i < batchCount; i++) {
-        const promise = db.collection('AnxietyHistory')
-          .orderBy('createdAt', 'desc')
-          .skip(i * batchSize)
-          .limit(batchSize)
-          .get();
-        tasks.push(promise);
-      }
-      
-      const results = await Promise.all(tasks);
-      const allData = results.reduce((acc, res) => acc.concat(res.data), []);
+      const res = await get('/anxiety-records', { page: 1, pageSize: 100 });
+      const allData = res.data || [];
       
       const historyList = allData.map(item => ({
         ...item,
+        _id: item.id,
+        content: item.reason || '',
         dateStr: this.formatDateTime(item.createdAt),
         dateOnly: formatDate(item.createdAt)
       }));
@@ -125,10 +108,7 @@ Page({
       content: '确定要删除这条记录吗？',
       success: (res) => {
         if (res.confirm) {
-          const db = wx.cloud.database();
-          db.collection('AnxietyHistory')
-            .doc(item._id)
-            .remove()
+          del(`/anxiety-records/${item.id || item._id}`)
             .then(() => {
               wx.showToast({ title: '已删除', icon: 'success' });
               this.loadHistory();
@@ -154,15 +134,7 @@ Page({
       success: (res) => {
         if (res.confirm) {
           wx.showLoading({ title: '清空中...' });
-          const db = wx.cloud.database();
-          const _ = db.command;
-          
-          // 删除当前用户的所有记录
-          db.collection('AnxietyHistory')
-            .where({
-              _openid: _.exists(true)
-            })
-            .remove()
+          del('/anxiety-records')
             .then(() => {
               wx.hideLoading();
               wx.showToast({ title: '已清空', icon: 'success' });

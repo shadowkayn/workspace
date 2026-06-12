@@ -1,4 +1,4 @@
-const { checkLogin, formatDate } = require('../../utils/index');
+const { checkLogin, formatDate, get, del } = require('../../utils/index');
 
 Page({
   data: {
@@ -19,7 +19,7 @@ Page({
     // 统计数据
     moodStats: {},
     
-    // 情绪关怀提示 - 治愈且直击心灵的话语
+    // 情绪关怀提示
     moodTips: {
       happy: '你的笑容是这个世界最美的风景。请记住此刻的感受，它会成为你穿越黑暗时的光 ✨',
       calm: '在这个喧嚣的世界里，你找到了属于自己的宁静。这份平和，是你给自己最好的礼物 🌿',
@@ -33,7 +33,7 @@ Page({
     this.loadHistory();
   },
 
-  // 加载历史记录
+  // 加载历史记录（从API）
   async loadHistory() {
     if (!checkLogin()) {
       wx.showModal({
@@ -52,33 +52,14 @@ Page({
     }
 
     this.setData({ loading: true });
-    const db = wx.cloud.database();
     
     try {
-      // 先获取总数
-      const countResult = await db.collection('MoodRecords').count();
-      const total = countResult.total;
+      const res = await get('/mood-records', { page: 1, pageSize: 1000 });
       
-      // 分批查询所有数据
-      const batchSize = 100;
-      const batchCount = Math.ceil(total / batchSize);
-      const tasks = [];
-      
-      for (let i = 0; i < batchCount; i++) {
-        const promise = db.collection('MoodRecords')
-          .orderBy('createdAt', 'desc')
-          .skip(i * batchSize)
-          .limit(batchSize)
-          .get();
-        tasks.push(promise);
-      }
-      
-      const results = await Promise.all(tasks);
-      const allData = results.reduce((acc, res) => acc.concat(res.data), []);
-      
-      const records = allData.map(item => ({
+      const records = res.records.map(item => ({
         ...item,
-        dateStr: this.formatDateTime(item.createdAt)
+        dateStr: this.formatDateTime(item.createdAt),
+        note: item.content // API返回的是content字段
       }));
       
       this.setData({
@@ -153,7 +134,7 @@ Page({
     });
   },
 
-  // 删除记录
+  // 删除记录（调用API）
   deleteRecord(e) {
     const item = e.currentTarget.dataset.item;
     
@@ -162,10 +143,7 @@ Page({
       content: '确定要删除这条记录吗？',
       success: (res) => {
         if (res.confirm) {
-          const db = wx.cloud.database();
-          db.collection('MoodRecords')
-            .doc(item._id)
-            .remove()
+          del(`/mood-records/${item.id}`)
             .then(() => {
               wx.showToast({ title: '已删除', icon: 'success' });
               this.loadHistory();

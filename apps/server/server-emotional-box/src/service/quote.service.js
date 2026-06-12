@@ -157,6 +157,40 @@ export const QuoteService = {
   },
 
   /**
+   * 获取我的收藏语录
+   */
+  async getMyFavorites({ userId, page = 1, limit = 100 } = {}) {
+    if (!userId) {
+      throw new Error("请先登录");
+    }
+
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const { favorites, total } = await QuoteRepository.findFavoritesByUserId(
+      userId,
+      { skip, take: limitNum }
+    );
+
+    return {
+      favorites: favorites.map((favorite) => ({
+        ...favorite.quote,
+        favoriteId: favorite.id,
+        favoritedAt: favorite.createdAt,
+        isFavorited: true,
+        favoriteCount: favorite.quote._count.favoritedBy,
+      })),
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    };
+  },
+
+  /**
    * 获取单条语录详情
    */
   async getQuoteById(id, userId) {
@@ -218,6 +252,18 @@ export const QuoteService = {
    */
   async getCategories() {
     return await QuoteRepository.getCategories();
+  },
+
+  /**
+   * 获取用户的收藏列表
+   */
+  async getUserFavorites(userId, options = {}) {
+    if (!userId) {
+      throw new Error("请先登录");
+    }
+
+    const { page = 1, pageSize = 20 } = options;
+    return await QuoteRepository.getUserFavorites(userId, page, pageSize);
   },
 
   /**

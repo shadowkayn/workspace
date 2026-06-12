@@ -18,16 +18,19 @@ router.get("/today", optionalAuth, QuoteController.getTodayQuote);
 // 根据日期获取语录（可选登录）
 router.get("/date/:date", optionalAuth, QuoteController.getQuoteByDate);
 
-// 获取语录列表（可选登录，登录后显示收藏状态）
-router.get("/", optionalAuth, QuoteController.getQuotes);
+// 获取所有分类
+router.get("/categories/list", QuoteController.getCategories);
 
 // 随机获取一条语录（可选登录）
 router.get("/random/get", optionalAuth, QuoteController.getRandomQuote);
 
-// 获取所有分类
-router.get("/categories/list", QuoteController.getCategories);
-
 // ==================== 需要认证的接口 ====================
+
+// 获取我的收藏列表（必须在 /:id 之前）
+router.get("/favorites", authenticate, QuoteController.getFavorites);
+
+// 获取语录列表（可选登录，登录后显示收藏状态）
+router.get("/", optionalAuth, QuoteController.getQuotes);
 
 // 收藏语录
 router.post("/:id/favorite", authenticate, QuoteController.favoriteQuote);
@@ -35,7 +38,7 @@ router.post("/:id/favorite", authenticate, QuoteController.favoriteQuote);
 // 取消收藏语录
 router.delete("/:id/favorite", authenticate, QuoteController.unfavoriteQuote);
 
-// 获取单条语录详情（可选登录）
+// 获取单条语录详情（可选登录）- 必须放在最后，因为是动态路由
 router.get("/:id", optionalAuth, QuoteController.getQuoteById);
 
 // 创建语录（需要登录，后续可以加管理员权限）

@@ -174,6 +174,33 @@ class MoodRecordRepository {
   }
 
   /**
+   * 按日期范围查找日记
+   */
+  async findByDateRange(userId, startDate, endDate) {
+    return await prisma.moodRecord.findMany({
+      where: {
+        userId,
+        createdAt: {
+          gte: new Date(startDate),
+          lt: new Date(endDate),
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            nickname: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
    * 获取情绪统计
    */
   async getMoodStats(userId, startDate, endDate) {

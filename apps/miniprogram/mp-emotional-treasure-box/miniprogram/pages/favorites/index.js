@@ -1,11 +1,11 @@
-const { checkLogin, formatDate, generateQuoteCard, getRandomBgImage } = require('../../utils/index');
+const { checkLogin, formatDate, generateQuoteCard, getRandomBgImage, get, del } = require('../../utils/index');
 
 Page({
   data: {
     favorites: [],
     showCardModal: false,
     cardImagePath: '',
-    cardFlipped: false // 添加翻牌状态
+    cardFlipped: false
   },
 
   onLoad() {
@@ -13,52 +13,37 @@ Page({
   },
 
   onShow() {
-    this.loadFavorites();
+    // onShow 中不再调用 loadFavorites，避免重复请求
+    // this.loadFavorites();
   },
 
-  // 加载收藏列表（从云数据库）- 自动过滤当前用户的收藏
+  // 加载收藏列表（从API）
   async loadFavorites() {
-    // 使用工具函数检查登录
     if (!checkLogin()) {
       this.setData({ favorites: [] });
       return;
     }
 
     wx.showLoading({ title: '加载中...' });
-    const db = wx.cloud.database();
     
     try {
-      // 先获取总数
-      const countResult = await db.collection('UserFavorites').count();
-      const total = countResult.total;
-      
-      // 分批查询所有数据
-      const batchSize = 100;
-      const batchCount = Math.ceil(total / batchSize);
-      const tasks = [];
-      
-      for (let i = 0; i < batchCount; i++) {
-        const promise = db.collection('UserFavorites')
-          .orderBy('createdAt', 'desc')
-          .skip(i * batchSize)
-          .limit(batchSize)
-          .get();
-        tasks.push(promise);
-      }
-      
-      const results = await Promise.all(tasks);
-      const allData = results.reduce((acc, res) => acc.concat(res.data), []);
+      const res = await get('/quotes/favorites', { page: 1, pageSize: 1000 });
       
       wx.hideLoading();
+      
+      // res 结构：{ data: { favorites: [...], pagination: {...} }, pagination: {...} }
+      const favoritesData = res.data?.favorites || res.favorites || [];
+      
       // 格式化数据以适配页面显示
-      const favorites = allData.map(item => ({
-        quote: item.content,
-        author: item.author,
-        date: formatDate(item.createdAt),
-        timestamp: item.createdAt.getTime(),
-        _id: item._id,
-        quote_id: item.quote_id
+      const favorites = favoritesData.map(item => ({
+        quote: item.quote.content,
+        author: item.quote.author,
+        date: formatDate(new Date(item.createdAt)),
+        timestamp: new Date(item.createdAt).getTime(),
+        _id: item.id,
+        quote_id: item.quoteId
       }));
+      
       this.setData({ favorites });
     } catch (err) {
       wx.hideLoading();
@@ -112,7 +97,7 @@ Page({
     }
   },
 
-  // 删除收藏（从云数据库）
+  // 删除收藏（调用API）
   deleteFavorite(e) {
     const index = e.currentTarget.dataset.index;
     const item = this.data.favorites[index];
@@ -122,10 +107,7 @@ Page({
       content: '确定要删除这条收藏吗？',
       success: (res) => {
         if (res.confirm) {
-          const db = wx.cloud.database();
-          db.collection('UserFavorites')
-            .doc(item._id)
-            .remove()
+          del(`/quotes/${item.quote_id}/favorite`)
             .then(() => {
               wx.showToast({ title: '已删除', icon: 'success' });
               this.loadFavorites(); // 重新加载列表

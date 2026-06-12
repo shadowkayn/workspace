@@ -1,4 +1,4 @@
-const { checkLoginWithTip, formatDateDash, checkTextSecurityWithLoading } = require('../../utils/index');
+const { checkLoginWithTip, formatDateDash, checkTextSecurityWithLoading, get, post } = require('../../utils/index');
 
 Page({
   data: {
@@ -42,30 +42,24 @@ Page({
       this.getTabBar().setData({ selected: 2 });
     }
     this.checkTodayRecord();
-    this.loadStatistics(); // 添加统计数据加载
+    this.loadStatistics();
   },
 
-  // 检查今天是否已记录
+  // 检查今天是否已记录（调用API）
   checkTodayRecord() {
     if (!checkLoginWithTip({ content: '情绪记录需要登录后使用' })) {
       return;
     }
 
-    const db = wx.cloud.database();
     const today = formatDateDash(new Date());
     
-    db.collection('MoodRecords')
-      .where({
-        date: today
-      })
-      .get()
+    get('/mood-records/today')
       .then(res => {
-        if (res.data.length > 0) {
-          const record = res.data[0];
+        if (res.record) {
           this.setData({
             todayRecorded: true,
-            todayMood: record.mood,
-            todayNote: record.note || ''
+            todayMood: res.record.mood,
+            todayNote: res.record.content || ''
           });
         } else {
           this.setData({
@@ -99,7 +93,7 @@ Page({
     this.setData({ todayNote: e.detail.value });
   },
 
-  // 保存记录
+  // 保存记录（调用API）
   async saveMood() {
     if (!this.data.todayMood) {
       wx.showToast({ title: '请选择今天的心情', icon: 'none' });
@@ -127,17 +121,13 @@ Page({
 
     wx.showLoading({ title: '保存中...' });
 
-    const db = wx.cloud.database();
-    const today = formatDateDash(new Date());
-    
-    db.collection('MoodRecords').add({
-      data: {
+    try {
+      await post('/mood-records', {
         mood: this.data.todayMood,
-        note: this.data.todayNote,
-        date: today,
-        createdAt: db.serverDate()
-      }
-    }).then(() => {
+        content: this.data.todayNote,
+        moodScore: 5
+      });
+      
       wx.hideLoading();
       wx.vibrateShort({ type: 'medium' });
       
@@ -151,61 +141,37 @@ Page({
       
       // 重新加载统计
       this.loadStatistics();
-    }).catch(err => {
+    } catch (err) {
       wx.hideLoading();
       console.error('保存失败', err);
       wx.showToast({ title: '保存失败', icon: 'none' });
-    });
+    }
   },
 
-  // 加载统计数据
+  // 加载统计数据（调用API）
   async loadStatistics() {
     if (!checkLoginWithTip({ content: '' })) {
       return;
     }
 
-    const db = wx.cloud.database();
-    const _ = db.command;
-    
-    // 计算7天前的日期
-    const today = new Date();
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(today.getDate() - 6); // 包含今天共7天
-    
-    const startDate = formatDateDash(sevenDaysAgo);
-    const endDate = formatDateDash(today);
-
     try {
-      // 查询最近7天的记录
-      const countResult = await db.collection('MoodRecords')
-        .where({
-          date: _.gte(startDate).and(_.lte(endDate))
-        })
-        .count();
-      const total = countResult.total;
+      // 获取最近7天的记录
+      const res = await get('/mood-records', { page: 1, pageSize: 1000 });
       
-      const batchSize = 100;
-      const batchCount = Math.ceil(total / batchSize);
-      const tasks = [];
+      // 计算7天前的日期
+      const today = new Date();
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(today.getDate() - 6);
       
-      for (let i = 0; i < batchCount; i++) {
-        const promise = db.collection('MoodRecords')
-          .where({
-            date: _.gte(startDate).and(_.lte(endDate))
-          })
-          .orderBy('date', 'desc')
-          .skip(i * batchSize)
-          .limit(batchSize)
-          .get();
-        tasks.push(promise);
-      }
-      
-      const results = await Promise.all(tasks);
-      const recentData = results.reduce((acc, res) => acc.concat(res.data), []);
+      // 过滤最近7天的数据
+      const recentData = res.records.filter(item => {
+        const recordDate = new Date(item.createdAt);
+        return recordDate >= sevenDaysAgo;
+      });
       
       // 格式化日期显示
       const formattedData = recentData.map(item => {
-        const date = new Date(item.date);
+        const date = new Date(item.createdAt);
         const month = date.getMonth() + 1;
         const day = date.getDate();
         return {
@@ -214,13 +180,9 @@ Page({
         };
       });
       
-      // 查询用户总共记录了多少天（所有历史记录）
-      const totalCountResult = await db.collection('MoodRecords').count();
-      const totalDays = totalCountResult.total; // 因为一天只能记录一次，所以记录数=天数
-      
       this.setData({ 
         recentMoods: formattedData,
-        totalRecords: totalDays
+        totalRecords: res.pagination.total
       });
       
       this.calculateMoodStats(recentData);

@@ -64,6 +64,37 @@ class AnxietyHistoryController {
       data: records,
     });
   });
+
+  /**
+   * 删除单条焦虑记录
+   * DELETE /api/anxiety-records/:id
+   */
+  deleteAnxietyRecord = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    await anxietyHistoryService.deleteAnxietyRecord(id, userId);
+
+    res.json({
+      code: 200,
+      message: "焦虑记录删除成功",
+    });
+  });
+
+  /**
+   * 清空我的所有焦虑记录
+   * DELETE /api/anxiety-records
+   */
+  clearMyAnxietyRecords = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const result = await anxietyHistoryService.clearMyAnxietyRecords(userId);
+
+    res.json({
+      code: 200,
+      message: "焦虑记录已清空",
+      data: result,
+    });
+  });
 }
 
 export default new AnxietyHistoryController();

@@ -126,6 +126,33 @@ class MoodRecordController {
   });
 
   /**
+   * 获取今天的情绪记录
+   * GET /api/mood-records/today
+   */
+  getTodayMoodRecord = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const records = await moodRecordService.getMoodRecordsByDateRange(
+      userId,
+      today.toISOString(),
+      tomorrow.toISOString()
+    );
+
+    res.json({
+      code: 200,
+      message: "success",
+      data: {
+        record: records.length > 0 ? records[0] : null
+      }
+    });
+  });
+
+  /**
    * 获取情绪统计
    * GET /api/mood-records/stats
    */

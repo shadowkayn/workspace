@@ -126,6 +126,26 @@ export const QuoteController = {
   }),
 
   /**
+   * 获取我的收藏列表
+   * GET /api/quotes/favorites
+   */
+  getFavorites: catchAsync(async (req, res) => {
+    const userId = req.user.id;
+    const { page = 1, pageSize = 20 } = req.query;
+
+    const result = await QuoteService.getUserFavorites(userId, {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+    });
+
+    res.json({
+      code: 200,
+      message: "success",
+      data: result,
+    });
+  }),
+
+  /**
    * 收藏语录
    * POST /api/quotes/:id/favorite
    */

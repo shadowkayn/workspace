@@ -13,6 +13,13 @@ const normalLimiter = createRateLimiter("normal");
 const strictLimiter = createRateLimiter("strict");
 
 /**
+ * @route   GET /api/mood-records/today
+ * @desc    获取今天的情绪记录
+ * @access  Private
+ */
+router.get("/today", normalLimiter, moodRecordController.getTodayMoodRecord);
+
+/**
  * @route   GET /api/mood-records/stats
  * @desc    获取情绪统计
  * @access  Private

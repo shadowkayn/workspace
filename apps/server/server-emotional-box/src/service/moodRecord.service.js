@@ -194,6 +194,13 @@ class MoodRecordService {
   }
 
   /**
+   * 按日期范围查询日记
+   */
+  async getMoodRecordsByDateRange(userId, startDate, endDate) {
+    return await moodRecordRepository.findByDateRange(userId, startDate, endDate);
+  }
+
+  /**
    * 获取情绪统计
    */
   async getMoodStats(userId, startDate, endDate) {

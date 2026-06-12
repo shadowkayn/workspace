@@ -1,4 +1,6 @@
-const { checkLogin, checkLoginWithTip, checkTextSecurityWithLoading } = require('../../utils/index');
+const { checkLogin, checkLoginWithTip, get, post } = require('../../utils/index');
+
+const SHRED_SOUND_URL = '';
 
 Page({
   data: {
@@ -31,19 +33,17 @@ Page({
     this.setData({ isLogin });
     
     if (isLogin) {
-      this.loadShredCountFromCloud();
+      this.loadShredCount();
     } else {
       this.setData({ totalShredded: 0 });
     }
   },
 
-  // 从云数据库加载粉碎次数
-  loadShredCountFromCloud() {
-    const db = wx.cloud.database();
-    db.collection('AnxietyHistory')
-      .count()
+  // 从后端加载粉碎次数
+  loadShredCount() {
+    get('/anxiety-records', { page: 1, pageSize: 1 })
       .then(res => {
-        this.setData({ totalShredded: res.total });
+        this.setData({ totalShredded: res.pagination ? res.pagination.total : 0 });
       })
       .catch(err => {
         console.error('加载粉碎次数失败', err);
@@ -100,26 +100,15 @@ Page({
       return;
     }
 
-    // 内容安全检测
-    const securityResult = await checkTextSecurityWithLoading(this.data.content, '检测内容安全...');
-    
-    if (!securityResult.safe) {
-      wx.showModal({
-        title: '内容提示',
-        content: securityResult.message,
-        showCancel: false,
-        confirmText: '我知道了'
-      });
-      return;
-    }
-
     // 震动反馈
     wx.vibrateShort({ type: 'medium' });
 
-    // 播放音效（需要上传音频文件到云存储）
-    const innerAudioContext = wx.createInnerAudioContext();
-    innerAudioContext.src = 'https://636c-cloud1-7g27vhf9d8bd5dbb-1415544021.tcb.qcloud.la/shred-sound.mp3'; // 替换为实际音频URL
-    innerAudioContext.play();
+    // 播放音效
+    if (SHRED_SOUND_URL) {
+      const innerAudioContext = wx.createInnerAudioContext();
+      innerAudioContext.src = SHRED_SOUND_URL;
+      innerAudioContext.play();
+    }
 
     this.setData({ shredding: true, showPile: false });
     this.generateParts();
@@ -141,7 +130,7 @@ Page({
       });
       
       // 重新加载粉碎次数
-      this.loadShredCountFromCloud();
+      this.loadShredCount();
       
       wx.showToast({ 
         title: '焦虑已粉碎', 
@@ -152,13 +141,9 @@ Page({
 
   // 保存到历史记录
   saveToHistory(content) {
-    const db = wx.cloud.database();
-    db.collection('AnxietyHistory').add({
-      data: {
-        content: content,
-        createdAt: db.serverDate()
-      }
-    }).then(() => {
+    post('/anxiety-records', {
+      score: 5,
+      reason: content
     }).catch(err => {
       console.error('❌ 保存历史失败', err);
     });

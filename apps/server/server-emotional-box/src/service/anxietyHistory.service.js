@@ -48,6 +48,31 @@ class AnxietyHistoryService {
   async getTodayAnxietyRecords(userId) {
     return await anxietyHistoryRepository.findTodayByUserId(userId);
   }
+
+  /**
+   * 删除单条焦虑记录
+   */
+  async deleteAnxietyRecord(id, userId) {
+    const record = await anxietyHistoryRepository.findById(id);
+
+    if (!record) {
+      throw new AppError("焦虑记录不存在", 404);
+    }
+
+    if (record.userId !== userId) {
+      throw new AppError("无权删除此记录", 403);
+    }
+
+    await anxietyHistoryRepository.delete(id);
+    return { message: "焦虑记录已删除" };
+  }
+
+  /**
+   * 清空我的所有焦虑记录
+   */
+  async clearMyAnxietyRecords(userId) {
+    return await anxietyHistoryRepository.deleteManyByUserId(userId);
+  }
 }
 
 export default new AnxietyHistoryService();

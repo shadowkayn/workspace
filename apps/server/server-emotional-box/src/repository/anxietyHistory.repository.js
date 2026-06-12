@@ -67,6 +67,15 @@ class AnxietyHistoryRepository {
   }
 
   /**
+   * 根据 ID 查找焦虑记录
+   */
+  async findById(id) {
+    return await prisma.anxietyHistory.findUnique({
+      where: { id },
+    });
+  }
+
+  /**
    * 查找用户今天的焦虑记录
    */
   async findTodayByUserId(userId) {
@@ -96,6 +105,24 @@ class AnxietyHistoryRepository {
           },
         },
       },
+    });
+  }
+
+  /**
+   * 删除单条焦虑记录
+   */
+  async delete(id) {
+    return await prisma.anxietyHistory.delete({
+      where: { id },
+    });
+  }
+
+  /**
+   * 删除用户所有焦虑记录
+   */
+  async deleteManyByUserId(userId) {
+    return await prisma.anxietyHistory.deleteMany({
+      where: { userId },
     });
   }
 }

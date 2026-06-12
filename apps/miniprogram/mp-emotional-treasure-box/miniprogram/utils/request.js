@@ -35,7 +35,7 @@ function request(options) {
         const body = res.data || {};
 
         if (res.statusCode >= 200 && res.statusCode < 300 && body.code < 400) {
-          resolve(body.data);
+          resolve(body.pagination ? { data: body.data, pagination: body.pagination } : body.data);
           return;
         }
 

@@ -83,6 +83,71 @@ export const QuoteRepository = {
   },
 
   /**
+   * 获取用户的收藏列表（分页）
+   */
+  async getUserFavorites(userId, page = 1, pageSize = 20) {
+    const skip = (page - 1) * pageSize;
+    const where = { userId };
+
+    const [favorites, total] = await Promise.all([
+      prisma.userFavorite.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: "desc" },
+        include: {
+          quote: {
+            include: {
+              _count: {
+                select: { favoritedBy: true },
+              },
+            },
+          },
+        },
+      }),
+      prisma.userFavorite.count({ where }),
+    ]);
+
+    return {
+      favorites,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  },
+
+  /**
+   * 查询用户收藏的语录（旧方法，保留兼容性）
+   */
+  async findFavoritesByUserId(userId, { skip = 0, take = 10 } = {}) {
+    const where = { userId };
+
+    const [favorites, total] = await Promise.all([
+      prisma.userFavorite.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: "desc" },
+        include: {
+          quote: {
+            include: {
+              _count: {
+                select: { favoritedBy: true },
+              },
+            },
+          },
+        },
+      }),
+      prisma.userFavorite.count({ where }),
+    ]);
+
+    return { favorites, total };
+  },
+
+  /**
    * 随机获取一条语录
    */
   async findRandom(category) {
