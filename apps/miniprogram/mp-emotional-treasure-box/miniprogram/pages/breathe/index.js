@@ -1,4 +1,4 @@
-const { checkLoginWithTip, formatDateDash, checkTextSecurityWithLoading, get, post } = require('../../utils/index');
+const { checkLoginWithTip, checkLogin, formatDateDash, checkTextSecurityWithLoading, get, post } = require('../../utils/index');
 
 Page({
   data: {
@@ -33,24 +33,28 @@ Page({
   },
 
   onLoad() {
-    this.checkTodayRecord();
-    this.loadStatistics();
+    // 如果已登录，自动加载数据
+    if (checkLogin()) {
+      this.checkTodayRecord();
+      this.loadStatistics();
+    }
   },
 
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 2 });
     }
-    this.checkTodayRecord();
-    this.loadStatistics();
+    
+    // 如果已登录，刷新数据
+    if (checkLogin()) {
+      this.checkTodayRecord();
+      this.loadStatistics();
+    }
   },
 
   // 检查今天是否已记录（调用API）
   checkTodayRecord() {
-    if (!checkLoginWithTip({ content: '情绪记录需要登录后使用' })) {
-      return;
-    }
-
+    // 不再在这里检查登录，由调用方控制
     const today = formatDateDash(new Date());
     
     get('/mood-records/today')
@@ -76,6 +80,11 @@ Page({
 
   // 选择情绪
   selectMood(e) {
+    // 先检查登录状态
+    if (!checkLoginWithTip({ content: '记录情绪需要先登录' })) {
+      return;
+    }
+
     if (this.data.todayRecorded) {
       wx.showToast({ title: '今天已记录过了', icon: 'none' });
       return;
@@ -150,10 +159,7 @@ Page({
 
   // 加载统计数据（调用API）
   async loadStatistics() {
-    if (!checkLoginWithTip({ content: '' })) {
-      return;
-    }
-
+    // 不再在这里检查登录，由调用方控制
     try {
       // 获取最近7天的记录
       const res = await get('/mood-records', { page: 1, pageSize: 1000 });

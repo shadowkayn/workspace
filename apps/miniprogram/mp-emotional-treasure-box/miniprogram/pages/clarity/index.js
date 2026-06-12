@@ -34,9 +34,10 @@ Page({
 
   onLoad() {
     this.loadBackgroundImages(); // 先加载背景图
-    this.fetchQuote();
+    this.fetchQuote(); // 会在 applyQuote 中设置收藏状态
     this.initBgMusic();
-    this.checkFavoriteStatus();
+    // 不再在 onLoad 中调用 checkFavoriteStatus，因为 fetchQuote 是异步的
+    // applyQuote 会根据登录状态设置 isFavorited
     // 自动播放音乐
     this.autoPlayMusic();
   },
@@ -159,11 +160,15 @@ Page({
   applyQuote(item) {
     if (!item) return;
 
+    const app = getApp();
+    const isLogin = app.checkLogin();
+
     this.setData({
       quote: item.content,
       author: item.author,
       quoteId: item.id,
-      isFavorited: !!item.isFavorited
+      // 只有登录时才使用 API 返回的收藏状态，未登录默认为 false
+      isFavorited: isLogin ? !!item.isFavorited : false
     });
   },
 
