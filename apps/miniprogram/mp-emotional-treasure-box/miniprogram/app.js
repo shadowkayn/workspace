@@ -1,12 +1,21 @@
 // app.js
 const authService = require('./services/auth.service');
 
+// ==================== 环境配置切换 ====================
+// 可选值：'development' (本地开发) 或 'production' (Render线上线上测试)
+const CURRENT_ENV = 'production';
+
+const API_CONFIG = {
+  development: "http://192.168.20.49:3000/api",
+  production: "https://emotional-box-api.onrender.com/api" // 👈 把这里替换成你的 Render 公网地址（注意保留结尾的 /api）
+};
+// ====================================================
+
 App({
   onLaunch: function () {
     this.globalData = {
-      // 开发环境：使用本地 IP 地址
-      // 生产环境：使用线上域名
-      apiBaseUrl: "http://192.168.20.49:3000/api", // 本地开发
+      // 根据当前环境自动获取对应的 API 地址
+      apiBaseUrl: API_CONFIG[CURRENT_ENV],
       fontLoaded: false,
       userInfo: null,
       openid: null,
@@ -61,7 +70,7 @@ App({
     return {
       title: '情绪宝藏盒 - 你的情绪观察员',
       path: '/pages/clarity/index',
-      imageUrl: '/images/share-cover.png' // 如果有分享图的话
+      imageUrl: '/images/share-cover.png'
     };
   }
 });
